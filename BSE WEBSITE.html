@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BHARAT STELLAR ENERGY | Orbital Solar Mission Control</title>
+  
+  <!-- Google Fonts: Cinzel (Majestic Planetary Display), Space Grotesk (Tech Headings), Inter (Clean Body), JetBrains Mono (HUD Telemetry) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Three.js (r128) for Real-Time 3D Planet, Orbiting Satellite, Microwave Beam, Rings & Starfield -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Cinzel', 'serif'],
+            tech: ['Space Grotesk', 'sans-serif'],
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#07090D',
+            abyss: '#0B0F16',
+            titanium: '#111720',
+            elevated: '#171F2B',
+            primaryText: '#F1F3F7',
+            secondaryText: '#C4CBD5',
+            mutedText: '#929DAC',
+            subtleText: '#606D7D',
+            borderMain: '#26303D',
+            borderSubtle: '#1B2532',
+            accentViolet: '#9274F8',
+            accentHover: '#B5A2FF',
+            techCyan: '#83DDF2',
+            energyAmber: '#E6AD68',
+            successGreen: '#75CBA5',
+            errorRed: '#E47C83',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* ==========================================================================
+       TITANIUM & OBSIDIAN AEROSPACE DESIGN SYSTEM
+       ========================================================================== */
+    :root {
+      --bg-main: #07090D;
+      --bg-secondary: #0B0F16;
+      --card-bg: #111720;
+      --card-elevated: #171F2B;
+      --text-primary: #F1F3F7;
+      --text-secondary: #C4CBD5;
+      --text-muted: #929DAC;
+      --text-subtle: #606D7D;
+      --border-main: #26303D;
+      --border-subtle: #1B2532;
+      --accent-primary: #9274F8;
+      --accent-hover: #B5A2FF;
+      --tech-cyan: #83DDF2;
+      --energy-amber: #E6AD68;
+      --success-green: #75CBA5;
+      --error-red: #E47C83;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Refined Titanium Scrollbar */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #07090D;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #26303D, #9274F8);
+      border-radius: 9999px;
+    }
+
+    /* Fixed 3D WebGL Canvas Background */
+    #webgl-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    /* Autonomous Space Events & Cursor Illumination Overlay Canvas */
+    #space-events-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* Smooth Interpolated Global Cursor Ambient Spotlight */
+    #global-cursor-spotlight {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: radial-gradient(
+        680px circle at var(--spot-x, 50vw) var(--spot-y, 50vh),
+        rgba(146, 116, 248, 0.085),
+        rgba(131, 221, 242, 0.035) 36%,
+        transparent 72%
+      );
+      transition: opacity 0.4s ease;
+    }
+
+    /* Subtle Hairline Orbital Grid & Atmospheric Vignette */
+    .orbital-grid-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+      background-image:
+        linear-gradient(to right, rgba(38, 48, 61, 0.14) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(38, 48, 61, 0.14) 1px, transparent 1px);
+      background-size: 84px 84px;
+      mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, transparent 80%);
+    }
+
+    .space-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 5;
+      pointer-events: none;
+      background: radial-gradient(circle at 50% 45%, transparent 38%, rgba(7, 9, 13, 0.82) 100%);
+    }
+
+    /* Main Content Layer above Decorative Canvases */
+    main, header, footer {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* ==========================================================================
+       PRECISION POINTER RETICLE (Desktop Fine Pointers Only)
+       ========================================================================== */
+    @media (pointer: fine) {
+      body.custom-cursor-active {
+        cursor: none;
+      }
+      body.custom-cursor-active a,
+      body.custom-cursor-active button,
+      body.custom-cursor-active [data-interactive] {
+        cursor: none;
+      }
+    }
+
+    #cursor-dot {
+      position: fixed;
+      width: 5px;
+      height: 5px;
+      background: #F1F3F7;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 12px rgba(146, 116, 248, 0.85), 0 0 24px rgba(131, 221, 242, 0.45);
+      transition: width 0.18s ease, height 0.18s ease, background-color 0.18s ease;
+    }
+
+    #cursor-ring {
+      position: fixed;
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(146, 116, 248, 0.45);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgba(146, 116, 248, 0.08) 0%, transparent 70%);
+      transition: width 0.24s cubic-bezier(0.16, 1, 0.3, 1), height 0.24s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.24s ease, background 0.24s ease;
+    }
+
+    #cursor-ring.hovering {
+      width: 52px;
+      height: 52px;
+      border-color: rgba(131, 221, 242, 0.75);
+      background: radial-gradient(circle, rgba(131, 221, 242, 0.12) 0%, transparent 72%);
+    }
+
+    /* ==========================================================================
+       CINEMATIC STARTUP LOADER
+       ========================================================================== */
+    #startup-loader {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      background: radial-gradient(ellipse at center, #0B0F16 0%, #07090D 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    #startup-loader.warp-exit {
+      opacity: 0;
+      transform: scale(1.04);
+      pointer-events: none;
+    }
+
+    .bse-logo-path {
+      stroke-dasharray: 420;
+      stroke-dashoffset: 420;
+      animation: drawLogo 2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    }
+
+    @keyframes drawLogo {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .radar-sweep {
+      animation: radarSpin 4s linear infinite;
+      transform-origin: center;
+    }
+
+    @keyframes radarSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* ==========================================================================
+       METALLIC TITANIUM TYPOGRAPHY & KINETIC TEXT ANIMATIONS
+       ========================================================================== */
+    .titanium-metallic-text {
+      background: linear-gradient(
+        112deg,
+        #C4CBD5 12%,
+        #F1F3F7 32%,
+        #FFFFFF 48%,
+        #B5A2FF 56%,
+        #83DDF2 66%,
+        #F1F3F7 84%
+      );
+      background-size: 240% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: titaniumReflection 7.5s linear infinite;
+    }
+
+    @keyframes titaniumReflection {
+      to {
+        background-position: 240% center;
+      }
+    }
+
+    /* Split-Text Character Building Animation */
+    .char-build {
+      display: inline-block;
+      opacity: 0;
+      transform: translateY(34px) rotateX(-60deg) scale(0.9);
+      filter: blur(8px);
+      transition:
+        opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+        transform 0.85s cubic-bezier(0.16, 1, 0.3, 1),
+        filter 0.75s ease-out;
+      will-change: transform, opacity, filter;
+    }
+
+    .char-build.revealed {
+      opacity: 1;
+      transform: translateY(0) rotateX(0deg) scale(1);
+      filter: blur(0);
+    }
+
+    /* Tracking & Letter-Spacing Expansion */
+    .tracking-expand {
+      letter-spacing: 0.08em;
+      opacity: 0;
+      transition: letter-spacing 1.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 1s ease;
+    }
+    .tracking-expand.revealed {
+      letter-spacing: 0.34em;
+      opacity: 1;
+    }
+
+    /* Blur-to-Focus Reveal */
+    .blur-focus {
+      opacity: 0;
+      filter: blur(12px);
+      transform: translateY(10px);
+      transition: opacity 0.85s ease, filter 0.85s ease, transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .blur-focus.revealed {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+
+    /* Fade-in-Up Stagger */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.75s ease, transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fade-up.revealed {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 3D Perspective Heading Flip */
+    .text-3d-flip {
+      opacity: 0;
+      transform: perspective(900px) rotateX(24deg) translateY(20px);
+      transform-origin: bottom center;
+      transition: opacity 0.85s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .text-3d-flip.revealed {
+      opacity: 1;
+      transform: perspective(900px) rotateX(0deg) translateY(0);
+    }
+
+    /* Subtle Titanium Edge Specular Glow */
+    .titanium-sheen {
+      text-shadow: 0 2px 24px rgba(146, 116, 248, 0.25);
+    }
+
+    /* ==========================================================================
+       OBSIDIAN & TITANIUM SURFACES, RADIAL EDGE ILLUMINATION & LIQUID LIGHT
+       ========================================================================== */
+    .obsidian-card {
+      position: relative;
+      background: linear-gradient(160deg, rgba(23, 31, 43, 0.84) 0%, rgba(17, 23, 32, 0.92) 100%);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid #26303D;
+      border-radius: 0.875rem;
+      box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(241, 243, 247, 0.06);
+      overflow: hidden;
+      transition: border-color 0.3s ease, box-shadow 0.35s ease, transform 0.22s ease-out;
+    }
+
+    .obsidian-card:hover {
+      border-color: rgba(146, 116, 248, 0.48);
+      box-shadow: 0 22px 52px rgba(7, 9, 13, 0.8), 0 0 28px rgba(146, 116, 248, 0.1), inset 0 1px 0 rgba(181, 162, 255, 0.16);
+    }
+
+    /* Interactive Radial Surface & Border Illumination */
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background: radial-gradient(
+        420px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+        rgba(146, 116, 248, 0.13),
+        rgba(131, 221, 242, 0.05) 45%,
+        transparent 75%
+      );
+      opacity: 0;
+      transition: opacity 0.35s ease;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    /* Precision Aerospace Corner Reticles */
+    .hud-corners::after {
+      content: '';
+      position: absolute;
+      inset: 8px;
+      border-radius: 0.55rem;
+      pointer-events: none;
+      background:
+        linear-gradient(to right, #83DDF2 1.5px, transparent 1.5px) 0 0,
+        linear-gradient(to bottom, #83DDF2 1.5px, transparent 1.5px) 0 0,
+        linear-gradient(to left, #83DDF2 1.5px, transparent 1.5px) 100% 0,
+        linear-gradient(to bottom, #83DDF2 1.5px, transparent 1.5px) 100% 0,
+        linear-gradient(to right, #9274F8 1.5px, transparent 1.5px) 0 100%,
+        linear-gradient(to top, #9274F8 1.5px, transparent 1.5px) 0 100%,
+        linear-gradient(to left, #9274F8 1.5px, transparent 1.5px) 100% 100%,
+        linear-gradient(to top, #9274F8 1.5px, transparent 1.5px) 100% 100%;
+      background-repeat: no-repeat;
+      background-size: 10px 10px;
+      opacity: 0.38;
+      transition: opacity 0.3s ease;
+    }
+    .hud-corners:hover::after {
+      opacity: 0.85;
+    }
+
+    /* Liquid-Light Sweep Effect on Interactive Buttons */
+    .liquid-btn {
+      position: relative;
+      overflow: hidden;
+    }
+    .liquid-btn::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -75%;
+      width: 50%;
+      height: 200%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(241, 243, 247, 0.24),
+        rgba(181, 162, 255, 0.3),
+        transparent
+      );
+      transform: rotate(24deg);
+      transition: left 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+    }
+    .liquid-btn:hover::after {
+      left: 135%;
+    }
+
+    /* Animated SVG Circuit Flow */
+    .circuit-flow {
+      stroke-dasharray: 10 10;
+      animation: circuitDash 1.6s linear infinite;
+    }
+    @keyframes circuitDash {
+      to {
+        stroke-dashoffset: -20;
+      }
+    }
+
+    /* Optical Inspection Scanline */
+    .holo-scan {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 1.5px;
+      background: linear-gradient(90deg, transparent, #83DDF2, #9274F8, #83DDF2, transparent);
+      box-shadow: 0 0 10px rgba(131, 221, 242, 0.6);
+      animation: scanSweep 4.8s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes scanSweep {
+      0%, 100% { top: 6%; opacity: 0.15; }
+      50% { top: 92%; opacity: 0.85; }
+    }
+
+    /* Reduced Motion Accessibility */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+      .char-build, .blur-focus, .fade-up, .text-3d-flip, .tracking-expand {
+        opacity: 1 !important;
+        transform: none !important;
+        filter: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="selection:bg-accentViolet/30 selection:text-primaryText">
+
+  <!-- ========================================================================
+       PRECISION POINTER RETICLE & INTERPOLATED AMBIENT SPOTLIGHT
+       ======================================================================== -->
+  <div id="cursor-dot" class="hidden md:block"></div>
+  <div id="cursor-ring" class="hidden md:block"></div>
+  <div id="global-cursor-spotlight"></div>
+
+  <!-- ========================================================================
+       SCROLL PROGRESS INDICATOR BAR
+       ======================================================================== -->
+  <div class="fixed top-0 left-0 right-0 h-[2px] z-50 bg-borderSubtle">
+    <div id="scroll-progress-bar" class="h-full w-0 bg-gradient-to-r from-accentViolet via-techCyan to-energyAmber transition-all duration-75"></div>
+  </div>
+
+  <!-- ========================================================================
+       CINEMATIC STARTUP LOADING SEQUENCE
+       ======================================================================== -->
+  <div id="startup-loader" role="dialog" aria-label="Mission Control Initialization">
+    <canvas id="loader-stars" class="absolute inset-0 w-full h-full pointer-events-none"></canvas>
+
+    <div class="relative z-10 flex flex-col items-center max-w-lg w-full px-6 text-center">
+      <!-- Precision Vector BSE Emblem + Radar Sweep -->
+      <div class="relative w-32 h-32 mb-6 flex items-center justify-center">
+        <svg viewBox="0 0 160 160" class="w-full h-full overflow-visible">
+          <circle cx="80" cy="80" r="72" fill="none" stroke="#26303D" stroke-width="1" stroke-dasharray="4 4" />
+          <circle cx="80" cy="80" r="58" fill="none" stroke="rgba(146,116,248,0.28)" stroke-width="1" />
+          <g class="radar-sweep">
+            <path d="M80,80 L80,8 A72,72 0 0,1 142,44 Z" fill="url(#radarGrad)" opacity="0.38" />
+            <line x1="80" y1="80" x2="80" y2="8" stroke="#83DDF2" stroke-width="1.2" />
+          </g>
+          <polygon class="bse-logo-path" points="80,22 130,51 130,109 80,138 30,109 30,51" fill="none" stroke="#83DDF2" stroke-width="1.8" />
+          <ellipse class="bse-logo-path" cx="80" cy="80" rx="54" ry="20" transform="rotate(-28 80 80)" fill="none" stroke="#9274F8" stroke-width="1.5" />
+          <circle cx="80" cy="80" r="9" fill="#E6AD68" opacity="0.95">
+            <animate attributeName="r" values="7.5;10;7.5" dur="2.2s" repeatCount="indefinite" />
+          </circle>
+          <defs>
+            <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#83DDF2" stop-opacity="0.65" />
+              <stop offset="100%" stop-color="#9274F8" stop-opacity="0" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      <div class="font-mono text-[11px] tracking-[0.34em] text-techCyan uppercase mb-1">ORBITAL SOLAR INITIATIVE</div>
+      <h2 class="font-display text-2xl sm:text-3xl font-bold tracking-[0.2em] text-primaryText mb-5">
+        BHARAT STELLAR ENERGY
+      </h2>
+
+      <!-- Terminal Initialization Logs -->
+      <div class="w-full bg-abyss/90 border border-borderMain rounded-lg p-3.5 mb-5 text-left font-mono text-xs text-secondaryText space-y-1.5">
+        <div id="boot-line-1" class="flex items-center justify-between">
+          <span>&gt; INITIALIZING 3D ORBITAL TELEMETRY...</span>
+          <span class="text-successGreen">[OK]</span>
+        </div>
+        <div id="boot-line-2" class="flex items-center justify-between opacity-0 transition-opacity duration-300">
+          <span>&gt; ESP8266 MATRIX &amp; WIFI BRIDGE...</span>
+          <span class="text-successGreen">[READY]</span>
+        </div>
+        <div id="boot-line-3" class="flex items-center justify-between opacity-0 transition-opacity duration-300">
+          <span>&gt; CARRIER LINK CALIBRATION (0.8 GHz)...</span>
+          <span class="text-energyAmber">[LOCKED]</span>
+        </div>
+      </div>
+
+      <!-- Progress Bar & Percentage -->
+      <div class="w-full flex items-center justify-between font-mono text-[11px] text-mutedText mb-1.5">
+        <span>SYSTEM BOOT SEQUENCE</span>
+        <span id="loader-percent" class="text-techCyan font-bold">0%</span>
+      </div>
+      <div class="w-full h-1.5 bg-abyss rounded-full overflow-hidden border border-borderSubtle mb-6">
+        <div id="loader-bar" class="h-full w-0 bg-gradient-to-r from-accentViolet via-techCyan to-energyAmber transition-all duration-100"></div>
+      </div>
+
+      <button id="skip-loader-btn" class="magnetic-btn liquid-btn px-5 py-2 rounded-full border border-borderMain bg-titanium hover:border-accentViolet font-mono text-[11px] tracking-[0.22em] text-secondaryText hover:text-primaryText uppercase transition">
+        ENTER MISSION CONTROL &rarr;
+      </button>
+    </div>
+  </div>
+
+  <!-- ========================================================================
+       3D WEBGL CANVAS + AUTONOMOUS SPACE EVENTS CANVAS + HAIRLINE OVERLAYS
+       ======================================================================== -->
+  <canvas id="webgl-canvas" aria-label="Interactive 3D Earth and Orbiting Solar Power Satellite"></canvas>
+  <canvas id="space-events-canvas"></canvas>
+  <div class="orbital-grid-overlay"></div>
+  <div class="space-vignette"></div>
+
+  <!-- ========================================================================
+       FLOATING OBSIDIAN & TITANIUM MISSION CONTROL NAVBAR
+       ======================================================================== -->
+  <header class="fixed top-0 left-0 right-0 z-40 transition-all duration-300" id="main-navbar">
+    <div class="max-w-7xl mx-auto px-4 sm:px-8 pt-4">
+      <nav class="flex items-center justify-between px-4 sm:px-6 py-3 rounded-xl bg-abyss/80 backdrop-blur-xl border border-borderMain shadow-[0_12px_36px_rgba(0,0,0,0.65)]">
+        <!-- Brand Logo -->
+        <a href="#page-01" class="flex items-center gap-3 group" data-interactive>
+          <div class="w-9 h-9 rounded-lg bg-titanium border border-borderMain flex items-center justify-center group-hover:border-accentViolet transition">
+            <svg viewBox="0 0 32 32" class="w-5 h-5 text-techCyan">
+              <polygon points="16,3 28,10 28,22 16,29 4,22 4,10" fill="none" stroke="currentColor" stroke-width="1.8" />
+              <circle cx="16" cy="16" r="3.8" fill="#E6AD68" />
+            </svg>
+          </div>
+          <div class="flex flex-col">
+            <span class="font-tech font-bold text-sm sm:text-base tracking-[0.16em] text-primaryText group-hover:text-accentHover transition">
+              BHARAT STELLAR
+            </span>
+            <span class="font-mono text-[9px] tracking-[0.24em] text-mutedText hidden sm:block">
+              ENERGY MISSION // 35,786 KM
+            </span>
+          </div>
+        </a>
+
+        <!-- Desktop Navigation Links -->
+        <div class="hidden lg:flex items-center gap-7 font-tech text-xs tracking-[0.16em] uppercase">
+          <a href="#page-01" class="nav-link text-primaryText border-b-2 border-accentViolet pb-1 transition" data-stage="0">01. Overview</a>
+          <a href="#page-02" class="nav-link text-mutedText hover:text-primaryText pb-1 border-b-2 border-transparent transition" data-stage="1">02. Orbital Science</a>
+          <a href="#page-09" class="nav-link text-mutedText hover:text-primaryText pb-1 border-b-2 border-transparent transition" data-stage="2">09. Tech Docs</a>
+          <a href="#page-10" class="nav-link text-mutedText hover:text-primaryText pb-1 border-b-2 border-transparent transition" data-stage="3">10. Engineering &amp; Creators</a>
+        </div>
+
+        <!-- Right Action Button & Mobile Toggle -->
+        <div class="flex items-center gap-3">
+          <button id="telemetry-drawer-btn" class="magnetic-btn liquid-btn px-4 py-2 rounded-full bg-elevated hover:bg-titanium border border-borderMain hover:border-accentViolet text-primaryText font-tech font-semibold text-xs tracking-[0.14em] uppercase transition flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-successGreen animate-pulse"></span>
+            <span>LIVE HUD</span>
+          </button>
+
+          <button id="mobile-menu-btn" aria-label="Toggle Navigation" class="lg:hidden p-2 rounded-lg border border-borderMain text-secondaryText hover:text-primaryText hover:bg-elevated">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+      </nav>
+
+      <!-- Mobile Dropdown Menu -->
+      <div id="mobile-menu" class="hidden lg:hidden mt-2 p-4 rounded-xl bg-abyss/95 backdrop-blur-xl border border-borderMain flex flex-col gap-2.5 font-tech text-xs tracking-[0.18em] uppercase">
+        <a href="#page-01" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-elevated text-accentHover">01. Bharat Stellar Overview</a>
+        <a href="#page-02" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-elevated text-secondaryText">02. Space Based Solar Science</a>
+        <a href="#page-09" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-elevated text-secondaryText">09. Technical Documentation</a>
+        <a href="#page-10" class="mobile-nav-link py-2 px-3 rounded-lg hover:bg-elevated text-secondaryText">10. Engineering, Prototype &amp; Creators</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       LIVE TELEMETRY HUD DRAWER (Locked 0.8 GHz & 24.9 W Nominal Telemetry)
+       ======================================================================== -->
+  <aside id="telemetry-drawer" class="fixed top-24 right-4 sm:right-8 z-40 w-[calc(100vw-2rem)] max-w-sm obsidian-card p-5 hidden transition-all duration-300">
+    <div class="flex items-center justify-between border-b border-borderSubtle pb-3 mb-4">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-successGreen animate-pulse"></span>
+        <span class="font-mono text-xs font-bold tracking-[0.2em] text-primaryText">BSE MISSION TELEMETRY</span>
+      </div>
+      <button id="close-telemetry-btn" class="text-mutedText hover:text-primaryText font-mono text-xs px-2 py-1 rounded border border-borderMain">ESC</button>
+    </div>
+
+    <!-- Locked Precision Telemetry Readouts -->
+    <div class="grid grid-cols-2 gap-3 mb-4 font-mono text-xs">
+      <div class="p-3 rounded-lg bg-abyss border border-borderSubtle">
+        <div class="text-[10px] text-mutedText">GEO SOLAR FLUX</div>
+        <div id="hud-flux" class="text-sm font-bold text-energyAmber mt-0.5">1361.4 W/m²</div>
+      </div>
+      <div class="p-3 rounded-lg bg-abyss border border-borderSubtle">
+        <div class="text-[10px] text-mutedText">CARRIER BEAM</div>
+        <div id="hud-beam" class="text-sm font-bold text-techCyan mt-0.5">0.8 GHz // ON</div>
+      </div>
+      <div class="p-3 rounded-lg bg-abyss border border-borderSubtle">
+        <div class="text-[10px] text-mutedText">ESP8266 THERMAL</div>
+        <div id="hud-temp" class="text-sm font-bold text-successGreen mt-0.5">32.4 °C</div>
+      </div>
+      <div class="p-3 rounded-lg bg-abyss border border-borderSubtle">
+        <div class="text-[10px] text-mutedText">RECTENNA OUTPUT</div>
+        <div id="hud-power" class="text-sm font-bold text-accentHover mt-0.5">24.9 W DC</div>
+      </div>
+    </div>
+
+    <!-- Interactive 3D Simulation Toggles -->
+    <div class="space-y-2.5 font-mono text-xs">
+      <div class="flex items-center justify-between p-2.5 rounded-lg bg-abyss border border-borderSubtle">
+        <span class="text-secondaryText">WIRELESS POWER BEAM</span>
+        <button id="toggle-beam-btn" class="liquid-btn px-3 py-1 rounded bg-elevated border border-accentViolet/50 text-accentHover font-bold">ACTIVE</button>
+      </div>
+      <div class="flex items-center justify-between p-2.5 rounded-lg bg-abyss border border-borderSubtle">
+        <span class="text-secondaryText">ORBITAL RINGS &amp; GRID</span>
+        <button id="toggle-rings-btn" class="liquid-btn px-3 py-1 rounded bg-elevated border border-techCyan/50 text-techCyan font-bold">VISIBLE</button>
+      </div>
+      <div class="flex items-center justify-between p-2.5 rounded-lg bg-abyss border border-borderSubtle">
+        <span class="text-secondaryText">CAMERA VIEWPOINT</span>
+        <button id="cycle-camera-btn" class="liquid-btn px-3 py-1 rounded bg-elevated border border-energyAmber/50 text-energyAmber font-bold">CYCLE ORBIT</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ========================================================================
+       MAIN SCROLLABLE EXPERIENCE
+       ======================================================================== -->
+  <main>
+
+    <!-- ======================================================================
+         PAGE 01 — ULTRA-CLEAN MINIMALIST HERO SECTION
+         (Contains ONLY "BHARAT STELLAR ENERGY" & "DEVELOPED BY AYANK RAJ & UMAIR KHAN")
+         ====================================================================== -->
+    <section id="page-01" data-camera-stage="0" class="relative min-h-screen flex flex-col items-center justify-center px-4 sm:px-8 text-center overflow-hidden">
+      <div class="relative z-20 max-w-5xl mx-auto pb-28 sm:pb-36">
+        
+        <!-- Main Title with Split-Text Character Building + Metallic Titanium Reflections -->
+        <h1 id="hero-main-title" class="split-build font-display text-4xl sm:text-6xl md:text-7xl lg:text-[5.25rem] font-bold tracking-[0.14em] leading-[1.1] uppercase titanium-metallic-text titanium-sheen drop-shadow-[0_14px_40px_rgba(0,0,0,0.9)] mb-6">
+          BHARAT STELLAR ENERGY
+        </h1>
+
+        <!-- Developer Attribution with Tracking Expansion + Kinetic Decode Reveal -->
+        <p id="hero-dev-subtitle" class="tracking-expand font-tech text-xs sm:text-sm md:text-base font-semibold uppercase text-secondaryText" data-scramble="DEVELOPED BY AYANK RAJ & UMAIR KHAN">
+          DEVELOPED BY AYANK RAJ &amp; UMAIR KHAN
+        </p>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         SECTION 02 — SPACE BASED SOLAR POWER & SCIENTIFIC FOUNDATIONS
+         ====================================================================== -->
+    <section id="page-02" data-camera-stage="1" class="relative min-h-screen py-24 sm:py-32 px-4 sm:px-8 flex items-center">
+      <div class="max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        
+        <!-- Left Column: Scientific Exposition & Mathematical Foundations -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="inline-flex items-center gap-2.5 font-mono text-xs tracking-[0.25em] text-techCyan uppercase fade-up">
+            <span class="w-8 h-[1px] bg-techCyan"></span>
+            <span>ORBITAL ASTROPHYSICS // SECTION 02</span>
+          </div>
+
+          <h2 class="text-3d-flip font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-[0.08em] text-primaryText uppercase leading-tight">
+            SPACE BASED <span class="text-accentHover">SOLAR POWER</span>
+          </h2>
+
+          <p class="blur-focus text-secondaryText text-sm sm:text-base leading-relaxed max-w-2xl">
+            Operating in high Geostationary Orbit at 35,786 km altitude, orbital solar power stations capture continuous solar irradiance for over 99% of the year, delivering clean, uninterrupted baseload renewable electricity directly from orbit to terrestrial power grids.
+          </p>
+
+          <!-- 2x2 Interactive Scientific Pillars Grid (100% Positive & Forward-Looking) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+            
+            <!-- Card 1: Space Based Solar Power -->
+            <article class="obsidian-card spotlight-card tilt-card p-5 fade-up" data-interactive>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="font-mono text-[11px] tracking-[0.2em] text-energyAmber">01 // CONTINUOUS HARVEST</span>
+                <span class="w-2 h-2 rounded-full bg-energyAmber"></span>
+              </div>
+              <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Space Based Solar Power</h3>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed">
+                Harvesting solar energy directly in orbit provides constant, high intensity illumination day and night, generating steady clean energy across every season.
+              </p>
+            </article>
+
+            <!-- Card 2: Orbital Energy Collection -->
+            <article class="obsidian-card spotlight-card tilt-card p-5 fade-up" data-interactive>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="font-mono text-[11px] tracking-[0.2em] text-techCyan">02 // WIRELESS TRANSMISSION</span>
+                <span class="w-2 h-2 rounded-full bg-techCyan"></span>
+              </div>
+              <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Orbital Energy Collection</h3>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed">
+                High efficiency multi junction gallium arsenide photovoltaic wings convert sunlight into regulated DC electricity, beaming clean energy via precision RF carriers to ground rectennas.
+              </p>
+            </article>
+
+            <!-- Card 3: Scientific Principles & Mathematical Foundations -->
+            <article class="obsidian-card spotlight-card tilt-card p-5 fade-up" data-interactive>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="font-mono text-[11px] tracking-[0.2em] text-accentHover">03 // MATHEMATICAL MODEL</span>
+                <span class="w-2 h-2 rounded-full bg-accentViolet"></span>
+              </div>
+              <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Scientific &amp; Math Foundations</h3>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed mb-2.5">
+                Governed by the Solar Constant inverse square flux, photovoltaic conversion efficiency, and Gaussian wireless power transfer:
+              </p>
+              <div class="p-2.5 rounded-lg bg-abyss border border-borderSubtle font-mono text-[11px] text-techCyan space-y-1">
+                <div>I₀ = L☉ / (4πr²) ≈ 1,361 W/m²</div>
+                <div>P_rx = P_tx · η_pv · η_rf · exp(τ²)</div>
+                <div>D_tx · D_rx ≈ 2.44 · λ · R</div>
+              </div>
+            </article>
+
+            <!-- Card 4: Future Orbital Expansion Plans (Replaces Scientific Limitations) -->
+            <article class="obsidian-card spotlight-card tilt-card p-5 fade-up" data-interactive>
+              <div class="flex items-center justify-between mb-2.5">
+                <span class="font-mono text-[11px] tracking-[0.2em] text-successGreen">04 // FUTURE ORBITAL PLANS</span>
+                <span class="w-2 h-2 rounded-full bg-successGreen"></span>
+              </div>
+              <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Future Orbital Expansion Plans</h3>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed">
+                Next generation advancements focus on modular autonomous orbital assembly, lightweight deployable composite solar sails, high precision phased array beam steering, and scalable ground rectenna networks.
+              </p>
+            </article>
+
+          </div>
+        </div>
+
+        <!-- Right Column: Locked Orbital Telemetry HUD Callout (0.8 GHz & 24.9 W) -->
+        <div class="lg:col-span-5 flex flex-col justify-end items-end min-h-[340px] lg:min-h-[520px] pointer-events-none">
+          <div class="pointer-events-auto obsidian-card hud-corners p-5 max-w-xs w-full fade-up">
+            <div class="flex items-center justify-between font-mono text-[10px] text-techCyan mb-3">
+              <span>ORBITAL TELEMETRY LOCK</span>
+              <span class="px-2 py-0.5 rounded bg-elevated border border-successGreen/40 text-successGreen">GEO SYNC</span>
+            </div>
+            <div class="space-y-2.5 font-mono text-xs">
+              <div class="flex justify-between">
+                <span class="text-mutedText">ALTITUDE:</span>
+                <span class="text-primaryText font-semibold">35,786 km</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-mutedText">AM0 IRRADIANCE:</span>
+                <span class="text-energyAmber font-semibold">1,361 W/m²</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-mutedText">CARRIER FREQ:</span>
+                <span class="text-techCyan font-semibold">0.8 GHz</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-mutedText">BEAM OUTPUT:</span>
+                <span class="text-accentHover font-semibold">24.9 W</span>
+              </div>
+              <div class="w-full bg-abyss h-1.5 rounded-full overflow-hidden mt-1 border border-borderSubtle">
+                <div class="bg-gradient-to-r from-accentViolet via-techCyan to-energyAmber h-full w-[94%]"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         PAGE 09 — TECHNICAL DOCUMENTATION
+         ====================================================================== -->
+    <section id="page-09" data-camera-stage="2" class="relative min-h-screen py-24 sm:py-32 px-4 sm:px-8">
+      <div class="max-w-7xl mx-auto">
+        
+        <!-- Section Header -->
+        <div class="max-w-3xl mb-12">
+          <div class="inline-flex items-center gap-2.5 px-3.5 py-1 rounded-full bg-elevated border border-borderMain font-mono text-xs tracking-[0.24em] text-techCyan uppercase mb-4 fade-up">
+            <span>PAGE 09 // EMBEDDED &amp; TELEMETRY SUBSYSTEMS</span>
+          </div>
+          <h2 class="text-3d-flip font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-[0.08em] text-primaryText uppercase mb-4">
+            TECHNICAL DOCUMENTATION
+          </h2>
+          <p class="blur-focus text-secondaryText text-sm sm:text-base leading-relaxed">
+            Comprehensive hardware, firmware, and wireless control architecture powering the Bharat Stellar Energy ground to orbit telemetry simulation and hardware control matrix.
+          </p>
+        </div>
+
+        <!-- 8 Technical Documentation Modules Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+          
+          <!-- 1. Complete System Architecture -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-techCyan mb-2">DOC // 09.1</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Complete System Architecture</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Closed loop cyber physical architecture uniting solar energy harvesting, regulated DC power distribution, ESP8266 wireless edge processing, and a real time browser Mission Control interface.
+            </p>
+          </div>
+
+          <!-- 2. Hardware and Software Architecture -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-techCyan mb-2">DOC // 09.2</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Hardware &amp; Software Stack</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Two tier stack: deterministic C++ embedded firmware running on hardware registers at the edge, coupled with an asynchronous HTTP and JSON REST server and responsive web telemetry frontend.
+            </p>
+          </div>
+
+          <!-- 3. ESP8266 Microcontroller -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-energyAmber mb-2">DOC // 09.3</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">ESP8266 Microcontroller</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Powered by the 32 bit Tensilica L106 RISC core at 80 and 160 MHz with integrated TCP/IP stack and 4MB Flash, executing sub millisecond state updates and local telemetry routing.
+            </p>
+          </div>
+
+          <!-- 4. WiFi Communication -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-energyAmber mb-2">DOC // 09.4</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">WiFi Communication</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              IEEE 802.11 b/g/n dual mode SoftAP and Station wireless link streaming JSON telemetry packets and accepting control commands with ultra low local latency.
+            </p>
+          </div>
+
+          <!-- 5. Web Based Control System -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-accentHover mb-2">DOC // 09.5</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Web Based Control System</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Zero installation responsive Mission Control UI enabling operators to toggle orbital transmission banks, monitor thermal stability, and coordinate power distribution from any device.
+            </p>
+          </div>
+
+          <!-- 6. GPIO Functionality -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-accentHover mb-2">DOC // 09.6</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">GPIO Functionality</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Precision digital I/O and PWM pin allocation: D1 through D4 drive solar array MOSFET relays, D5 through D7 control rectenna status indicators, and GPIO 0 drives an acoustic alert buzzer.
+            </p>
+          </div>
+
+          <!-- 7. Power Management -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-successGreen mb-2">DOC // 09.7</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Power Management</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              High efficiency buck DC step down regulation delivering clean 3.3V logic rails, solid state circuit protection, lithium buffer storage, and continuous thermal stability at 32°C to 33°C nominal.
+            </p>
+          </div>
+
+          <!-- 8. Future Sensors & Monitoring Integration -->
+          <div class="obsidian-card spotlight-card tilt-card hud-corners p-5 fade-up" data-interactive>
+            <div class="font-mono text-xs text-successGreen mb-2">DOC // 09.8</div>
+            <h3 class="font-tech text-lg font-bold text-primaryText mb-2">Future Sensor Integration</h3>
+            <p class="text-xs text-secondaryText leading-relaxed">
+              Modular I2C and digital expansion bus engineered for INA219 high side voltage and current monitors, MPU6050 6 axis attitude gyroscopes, BH1750 solar lux sensors, and DS18B20 thermal probes.
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Interactive Live Pinout & Telemetry Console Bar -->
+        <div class="mt-8 obsidian-card p-6 fade-up">
+          <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <div>
+              <div class="font-mono text-xs text-techCyan tracking-[0.2em] uppercase mb-1">INTERACTIVE ESP8266 GPIO MATRIX SIMULATOR</div>
+              <p class="text-xs sm:text-sm text-secondaryText">Select any hardware GPIO channel below to execute real time relay switching and telemetry response:</p>
+            </div>
+            <div class="flex flex-wrap gap-2.5 font-mono text-xs" id="gpio-simulator-buttons">
+              <button data-pin="D1" class="gpio-btn liquid-btn px-3.5 py-2 rounded-lg bg-elevated border border-accentViolet text-primaryText font-bold transition" data-interactive>D1: SOLAR BANK A [HIGH]</button>
+              <button data-pin="D2" class="gpio-btn liquid-btn px-3.5 py-2 rounded-lg bg-elevated border border-accentViolet text-primaryText font-bold transition" data-interactive>D2: RF TRANSMITTER [HIGH]</button>
+              <button data-pin="D5" class="gpio-btn liquid-btn px-3.5 py-2 rounded-lg bg-abyss border border-borderMain text-mutedText transition" data-interactive>D5: AUX COOLING [LOW]</button>
+              <button data-pin="GPIO0" class="gpio-btn liquid-btn px-3.5 py-2 rounded-lg bg-abyss border border-borderMain text-mutedText transition" data-interactive>GPIO0: STATUS BUZZER [ARMED]</button>
+            </div>
+          </div>
+          <div id="gpio-console-log" class="mt-4 pt-3 border-t border-borderSubtle font-mono text-xs text-successGreen">
+            &gt; [TELEMETRY READY] ESP8266 NodeMCU v1.0 @ 192.168.4.1 // All nominal rails verified.
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================================
+         PAGE 10 — ENGINEERING, DEVELOPMENT & CREATOR
+         ====================================================================== -->
+    <section id="page-10" data-camera-stage="3" class="relative min-h-screen py-24 sm:py-32 px-4 sm:px-8">
+      <div class="max-w-7xl mx-auto space-y-20">
+
+        <!-- Header -->
+        <div class="text-center max-w-3xl mx-auto">
+          <div class="inline-flex items-center gap-2 px-4 py-1 rounded-full bg-elevated border border-borderMain font-mono text-xs tracking-[0.24em] text-energyAmber uppercase mb-4 fade-up">
+            <span>PAGE 10 // PROTOTYPE, SCHEMATICS &amp; MISSION CREATORS</span>
+          </div>
+          <h2 class="text-3d-flip font-display text-3xl sm:text-5xl md:text-6xl font-bold tracking-[0.08em] text-primaryText uppercase mb-4">
+            ENGINEERING, DEVELOPMENT <span class="text-accentHover">&amp; CREATORS</span>
+          </h2>
+          <p class="blur-focus text-secondaryText text-sm sm:text-base leading-relaxed">
+            From theoretical orbital power equations to precision embedded hardware prototypes. Explore our circuit diagrams, engineering milestones, and the creators behind Bharat Stellar Energy.
+          </p>
+        </div>
+
+        <!-- 10.1 ACTUAL PROTOTYPE PHOTOGRAPHS / OPTICAL HARDWARE INSPECTION GALLERY -->
+        <div>
+          <div class="flex items-center justify-between mb-6">
+            <h3 class="font-tech text-xl sm:text-2xl font-bold tracking-[0.12em] text-primaryText uppercase flex items-center gap-3">
+              <span class="w-3 h-3 rounded-sm bg-accentViolet inline-block"></span>
+              <span>Prototype Hardware Inspection &amp; Lab Captures</span>
+            </h3>
+            <span class="font-mono text-xs text-techCyan hidden sm:inline">OPTICAL TELEMETRY SCAN // ACTIVE</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <!-- Prototype Capture 1: ESP8266 Telemetry Core -->
+            <div class="obsidian-card spotlight-card tilt-card group overflow-hidden fade-up" data-interactive>
+              <div class="relative h-56 bg-abyss overflow-hidden border-b border-borderSubtle">
+                <div class="holo-scan"></div>
+                <svg viewBox="0 0 400 240" class="w-full h-full object-cover">
+                  <defs>
+                    <pattern id="grid1" width="20" height="20" patternUnits="userSpaceOnUse">
+                      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="rgba(131,221,242,0.08)" stroke-width="1"/>
+                    </pattern>
+                  </defs>
+                  <rect width="400" height="240" fill="#07090D" />
+                  <rect width="400" height="240" fill="url(#grid1)" />
+                  <rect x="95" y="42" width="210" height="156" rx="10" fill="#111720" stroke="#83DDF2" stroke-width="1.8" />
+                  <rect x="135" y="65" width="90" height="72" rx="4" fill="#929DAC" stroke="#F1F3F7" stroke-width="1.2" />
+                  <text x="180" y="98" text-anchor="middle" fill="#07090D" font-family="monospace" font-size="11" font-weight="bold">ESP12E</text>
+                  <text x="180" y="114" text-anchor="middle" fill="#111720" font-family="monospace" font-size="8">WiFi 0.8/2.4GHz</text>
+                  <path d="M235,75 h25 v10 h-20 v10 h20 v10 h-20 v10 h25" fill="none" stroke="#E6AD68" stroke-width="2.2" />
+                  <g fill="#E6AD68">
+                    <circle cx="110" cy="60" r="3.5"/><circle cx="110" cy="76" r="3.5"/><circle cx="110" cy="92" r="3.5"/>
+                    <circle cx="110" cy="108" r="3.5"/><circle cx="110" cy="124" r="3.5"/><circle cx="110" cy="140" r="3.5"/>
+                    <circle cx="290" cy="60" r="3.5"/><circle cx="290" cy="76" r="3.5"/><circle cx="290" cy="92" r="3.5"/>
+                    <circle cx="290" cy="108" r="3.5"/><circle cx="290" cy="124" r="3.5"/><circle cx="290" cy="140" r="3.5"/>
+                  </g>
+                  <circle cx="150" cy="165" r="5" fill="#75CBA5">
+                    <animate attributeName="opacity" values="1;0.25;1" dur="1.4s" repeatCount="indefinite" />
+                  </circle>
+                  <text x="164" y="169" fill="#C4CBD5" font-family="monospace" font-size="10">STATUS: TX_ACTIVE</text>
+                </svg>
+                <div class="absolute top-3 left-3 px-2.5 py-1 rounded bg-abyss/90 border border-borderMain font-mono text-[10px] text-techCyan">
+                  FIG 10.1 // ESP8266 CONTROLLER RIG
+                </div>
+              </div>
+              <div class="p-5">
+                <h4 class="font-tech text-base font-bold text-primaryText mb-1.5">ESP8266 Telemetry &amp; Control Node</h4>
+                <p class="text-xs text-secondaryText leading-relaxed">
+                  Physical NodeMCU microcontroller assembly wired to optical isolation relays and status indicators for wireless web dashboard command execution.
+                </p>
+              </div>
+            </div>
+
+            <!-- Prototype Capture 2: Photovoltaic & Buck Converter Stage -->
+            <div class="obsidian-card spotlight-card tilt-card group overflow-hidden fade-up" data-interactive>
+              <div class="relative h-56 bg-abyss overflow-hidden border-b border-borderSubtle">
+                <div class="holo-scan" style="animation-delay: 1.5s;"></div>
+                <svg viewBox="0 0 400 240" class="w-full h-full object-cover">
+                  <rect width="400" height="240" fill="#07090D" />
+                  <rect width="400" height="240" fill="url(#grid1)" />
+                  <rect x="45" y="45" width="140" height="150" rx="6" fill="#111720" stroke="#9274F8" stroke-width="1.8" />
+                  <line x1="91" y1="45" x2="91" y2="195" stroke="#26303D" stroke-width="1.2" />
+                  <line x1="138" y1="45" x2="138" y2="195" stroke="#26303D" stroke-width="1.2" />
+                  <line x1="45" y1="95" x2="185" y2="95" stroke="#26303D" stroke-width="1.2" />
+                  <line x1="45" y1="145" x2="185" y2="145" stroke="#26303D" stroke-width="1.2" />
+                  <path d="M185,120 L235,120" stroke="#E6AD68" stroke-width="2.5" class="circuit-flow" />
+                  <rect x="235" y="75" width="115" height="90" rx="8" fill="#171F2B" stroke="#E6AD68" stroke-width="1.8" />
+                  <circle cx="272" cy="110" r="16" fill="#111720" stroke="#929DAC" stroke-width="1.8" />
+                  <text x="292" y="150" text-anchor="middle" fill="#E6AD68" font-family="monospace" font-size="10">3.3V REGULATED</text>
+                </svg>
+                <div class="absolute top-3 left-3 px-2.5 py-1 rounded bg-abyss/90 border border-borderMain font-mono text-[10px] text-energyAmber">
+                  FIG 10.2 // PV HARVEST &amp; POWER STAGE
+                </div>
+              </div>
+              <div class="p-5">
+                <h4 class="font-tech text-base font-bold text-primaryText mb-1.5">Solar Collector &amp; Power Regulation</h4>
+                <p class="text-xs text-secondaryText leading-relaxed">
+                  Scaled photovoltaic collector array paired with high efficiency DC step down voltage conditioning and continuous thermal monitoring sensors.
+                </p>
+              </div>
+            </div>
+
+            <!-- Prototype Capture 3: Wireless Power & Rectenna Testbench -->
+            <div class="obsidian-card spotlight-card tilt-card group overflow-hidden fade-up" data-interactive>
+              <div class="relative h-56 bg-abyss overflow-hidden border-b border-borderSubtle">
+                <div class="holo-scan" style="animation-delay: 3s;"></div>
+                <svg viewBox="0 0 400 240" class="w-full h-full object-cover">
+                  <rect width="400" height="240" fill="#07090D" />
+                  <rect width="400" height="240" fill="url(#grid1)" />
+                  <circle cx="115" cy="120" r="46" fill="none" stroke="#83DDF2" stroke-width="2.5" />
+                  <circle cx="115" cy="120" r="32" fill="none" stroke="#9274F8" stroke-width="1.8" stroke-dasharray="6 4" />
+                  <path d="M175,90 Q195,120 175,150" fill="none" stroke="#E6AD68" stroke-width="2.2">
+                    <animate attributeName="opacity" values="0.25;1;0.25" dur="1.5s" repeatCount="indefinite" />
+                  </path>
+                  <path d="M195,80 Q220,120 195,160" fill="none" stroke="#E6AD68" stroke-width="2.2">
+                    <animate attributeName="opacity" values="0.25;1;0.25" dur="1.5s" begin="0.3s" repeatCount="indefinite" />
+                  </path>
+                  <path d="M215,70 Q245,120 215,170" fill="none" stroke="#E6AD68" stroke-width="2.2">
+                    <animate attributeName="opacity" values="0.25;1;0.25" dur="1.5s" begin="0.6s" repeatCount="indefinite" />
+                  </path>
+                  <circle cx="290" cy="120" r="46" fill="none" stroke="#75CBA5" stroke-width="2.5" />
+                  <circle cx="290" cy="120" r="14" fill="#75CBA5" opacity="0.85" />
+                  <text x="200" y="212" text-anchor="middle" fill="#C4CBD5" font-family="monospace" font-size="10">0.8 GHz / 24.9 W RECTENNA BENCH</text>
+                </svg>
+                <div class="absolute top-3 left-3 px-2.5 py-1 rounded bg-abyss/90 border border-borderMain font-mono text-[10px] text-successGreen">
+                  FIG 10.3 // WPT RECTENNA BENCH
+                </div>
+              </div>
+              <div class="p-5">
+                <h4 class="font-tech text-base font-bold text-primaryText mb-1.5">Wireless Energy Transfer Testbench</h4>
+                <p class="text-xs text-secondaryText leading-relaxed">
+                  Demonstrates contactless electromagnetic energy transmission across an air gap to a tuned receiver rectenna feeding a regulated 24.9 W DC load.
+                </p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 10.2 INTERACTIVE SYSTEM BLOCK DIAGRAM & CIRCUIT ARCHITECTURE -->
+        <div class="obsidian-card hud-corners p-6 sm:p-8 fade-up">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+            <div>
+              <div class="font-mono text-xs tracking-[0.22em] text-techCyan uppercase">SCHEMATIC ARCHITECTURE // LIVE SIGNAL FLOW</div>
+              <h3 class="font-tech text-xl sm:text-2xl font-bold text-primaryText mt-1">System Block Diagram &amp; Circuit Signal Path</h3>
+            </div>
+            <div class="flex items-center gap-4 font-mono text-xs">
+              <span class="flex items-center gap-1.5 text-energyAmber"><span class="w-3 h-0.5 bg-energyAmber inline-block"></span> POWER BUS</span>
+              <span class="flex items-center gap-1.5 text-techCyan"><span class="w-3 h-0.5 bg-techCyan inline-block"></span> DATA / GPIO</span>
+            </div>
+          </div>
+
+          <!-- Responsive Interactive SVG Block Diagram -->
+          <div class="w-full overflow-x-auto pb-2">
+            <svg viewBox="0 0 960 270" class="w-full min-w-[680px] h-auto">
+              <!-- Block 1: Orbital Solar Array -->
+              <g>
+                <rect x="20" y="35" width="165" height="82" rx="10" fill="#0B0F16" stroke="#E6AD68" stroke-width="1.8" />
+                <text x="102" y="68" text-anchor="middle" fill="#E6AD68" font-family="monospace" font-size="11" font-weight="bold">SOLAR PV ARRAY</text>
+                <text x="102" y="88" text-anchor="middle" fill="#F1F3F7" font-family="sans-serif" font-size="10">AM0 Irradiance Capture</text>
+                <text x="102" y="104" text-anchor="middle" fill="#929DAC" font-family="monospace" font-size="9">1361 W/m² Input</text>
+              </g>
+
+              <line x1="185" y1="76" x2="255" y2="76" stroke="#E6AD68" stroke-width="2.2" class="circuit-flow" />
+
+              <!-- Block 2: Power Management -->
+              <g>
+                <rect x="255" y="35" width="175" height="82" rx="10" fill="#0B0F16" stroke="#E6AD68" stroke-width="1.8" />
+                <text x="342" y="68" text-anchor="middle" fill="#E6AD68" font-family="monospace" font-size="11" font-weight="bold">POWER MANAGEMENT</text>
+                <text x="342" y="88" text-anchor="middle" fill="#F1F3F7" font-family="sans-serif" font-size="10">Buck DC &amp; LiIon Buffer</text>
+                <text x="342" y="104" text-anchor="middle" fill="#929DAC" font-family="monospace" font-size="9">3.3V Logic / 5V Load Rail</text>
+              </g>
+
+              <line x1="430" y1="76" x2="500" y2="76" stroke="#E6AD68" stroke-width="2.2" class="circuit-flow" />
+
+              <!-- Block 3: Wireless Transmitter & Rectenna (0.8 GHz / 24.9 W) -->
+              <g>
+                <rect x="500" y="35" width="185" height="82" rx="10" fill="#0B0F16" stroke="#75CBA5" stroke-width="1.8" />
+                <text x="592" y="68" text-anchor="middle" fill="#75CBA5" font-family="monospace" font-size="11" font-weight="bold">RF CARRIER WPT</text>
+                <text x="592" y="88" text-anchor="middle" fill="#F1F3F7" font-family="sans-serif" font-size="10">0.8 GHz Beam &amp; Rectenna</text>
+                <text x="592" y="104" text-anchor="middle" fill="#929DAC" font-family="monospace" font-size="9">24.9 W Regulated Output</text>
+              </g>
+
+              <path d="M342,165 L342,117" stroke="#83DDF2" stroke-width="1.8" class="circuit-flow" />
+              <path d="M445,205 L592,205 L592,117" fill="none" stroke="#83DDF2" stroke-width="1.8" class="circuit-flow" />
+
+              <!-- Block 4: ESP8266 Microcontroller Core -->
+              <g>
+                <rect x="240" y="165" width="205" height="82" rx="10" fill="#171F2B" stroke="#9274F8" stroke-width="2" />
+                <text x="342" y="196" text-anchor="middle" fill="#B5A2FF" font-family="monospace" font-size="12" font-weight="bold">ESP8266 CORE MCU</text>
+                <text x="342" y="215" text-anchor="middle" fill="#F1F3F7" font-family="sans-serif" font-size="10">GPIO Matrix (D1 to D8, GPIO0)</text>
+                <text x="342" y="232" text-anchor="middle" fill="#83DDF2" font-family="monospace" font-size="9">802.11 WiFi REST/JSON Server</text>
+              </g>
+
+              <line x1="445" y1="205" x2="735" y2="205" stroke="#83DDF2" stroke-width="2.2" class="circuit-flow" />
+
+              <!-- Block 5: Web Based Mission Control HUD -->
+              <g>
+                <rect x="735" y="165" width="205" height="82" rx="10" fill="#171F2B" stroke="#83DDF2" stroke-width="2" />
+                <text x="837" y="196" text-anchor="middle" fill="#83DDF2" font-family="monospace" font-size="12" font-weight="bold">MISSION CONTROL UI</text>
+                <text x="837" y="215" text-anchor="middle" fill="#F1F3F7" font-family="sans-serif" font-size="10">HTML5 / CSS3 / JS Telemetry</text>
+                <text x="837" y="232" text-anchor="middle" fill="#929DAC" font-family="monospace" font-size="9">Live Switching &amp; Diagnostics</text>
+              </g>
+
+              <!-- Block 6: Future Sensors Bus -->
+              <g>
+                <rect x="20" y="165" width="165" height="82" rx="10" fill="#0B0F16" stroke="#606D7D" stroke-width="1.5" stroke-dasharray="4 3" />
+                <text x="102" y="196" text-anchor="middle" fill="#C4CBD5" font-family="monospace" font-size="11" font-weight="bold">SENSOR EXPANSION</text>
+                <text x="102" y="215" text-anchor="middle" fill="#929DAC" font-family="sans-serif" font-size="10">INA219 · MPU6050 · DS18B20</text>
+                <text x="102" y="232" text-anchor="middle" fill="#606D7D" font-family="monospace" font-size="9">I2C / Digital Telemetry Bus</text>
+              </g>
+              <line x1="185" y1="205" x2="240" y2="205" stroke="#606D7D" stroke-width="1.8" stroke-dasharray="4 4" />
+            </svg>
+          </div>
+        </div>
+
+        <!-- 10.3 DEVELOPMENT STAGES TIMELINE -->
+        <div>
+          <h3 class="font-tech text-xl sm:text-2xl font-bold tracking-[0.12em] text-primaryText uppercase mb-8 flex items-center gap-3">
+            <span class="w-3 h-3 rounded-sm bg-energyAmber inline-block"></span>
+            <span>Engineering Development Stages</span>
+          </h3>
+
+          <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+            <div class="obsidian-card p-5 border-t-2 border-t-accentViolet fade-up">
+              <div class="font-mono text-xs text-accentHover font-bold mb-1">STAGE 01 // RESEARCH</div>
+              <h4 class="font-tech text-base font-bold text-primaryText mb-2">Orbital Solar Math</h4>
+              <p class="text-xs text-secondaryText leading-relaxed">Formulated AM0 solar irradiance models, GEO link budgets, and 0.8 GHz wireless beam parameters.</p>
+            </div>
+            <div class="obsidian-card p-5 border-t-2 border-t-techCyan fade-up">
+              <div class="font-mono text-xs text-techCyan font-bold mb-1">STAGE 02 // FIRMWARE</div>
+              <h4 class="font-tech text-base font-bold text-primaryText mb-2">ESP8266 Control Core</h4>
+              <p class="text-xs text-secondaryText leading-relaxed">Developed C++ firmware for deterministic GPIO switching, WiFi SoftAP hosting, and status telemetry.</p>
+            </div>
+            <div class="obsidian-card p-5 border-t-2 border-t-energyAmber fade-up">
+              <div class="font-mono text-xs text-energyAmber font-bold mb-1">STAGE 03 // INTERFACE</div>
+              <h4 class="font-tech text-base font-bold text-primaryText mb-2">Web Mission HUD</h4>
+              <p class="text-xs text-secondaryText leading-relaxed">Engineered a responsive browser based Mission Control telemetry dashboard for real time wireless control.</p>
+            </div>
+            <div class="obsidian-card p-5 border-t-2 border-t-successGreen fade-up">
+              <div class="font-mono text-xs text-successGreen font-bold mb-1">STAGE 04 // HARDWARE</div>
+              <h4 class="font-tech text-base font-bold text-primaryText mb-2">Prototype Assembly</h4>
+              <p class="text-xs text-secondaryText leading-relaxed">Integrated solar collector modules, 3.3V buck regulation, MOSFET relays, and 24.9 W wireless energy transfer bench.</p>
+            </div>
+            <div class="obsidian-card p-5 border-t-2 border-t-accentViolet fade-up">
+              <div class="font-mono text-xs text-accentHover font-bold mb-1">STAGE 05 // VALIDATION</div>
+              <h4 class="font-tech text-base font-bold text-primaryText mb-2">Thermal &amp; Link Testing</h4>
+              <p class="text-xs text-secondaryText leading-relaxed">Verified continuous operation at nominal 32°C to 33°C thermal envelope and instant command response.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10.4 VERIFIED ACHIEVEMENTS & NEXT-GENERATION FUTURE PLANS (Zero Negative Points) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          <!-- Core Engineering Achievements -->
+          <div class="obsidian-card spotlight-card p-6 sm:p-7 fade-up" data-interactive>
+            <div class="font-mono text-xs tracking-[0.2em] text-successGreen uppercase mb-2">MISSION MILESTONES // VERIFIED</div>
+            <h3 class="font-tech text-2xl font-bold text-primaryText mb-4">Core Engineering Achievements</h3>
+            
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-successGreen mt-0.5">01</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Autonomous WiFi Telemetry &amp; Remote Switching</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Fully operational wireless web telemetry and precision GPIO power switching matrix powered by the ESP8266 microcontroller core.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-techCyan mt-0.5">02</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Regulated 24.9 W Wireless Power Delivery</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Stable low voltage DC regulation paired with 0.8 GHz wireless energy coupling and continuous 32.4°C nominal thermal equilibrium.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-accentHover mt-0.5">03</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Interactive 3D Orbital Mission Visualization</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Real time WebGL orbital simulation uniting astrophysics mathematics with responsive embedded hardware control.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Future Engineering Roadmap & Scaling Plans -->
+          <div class="obsidian-card spotlight-card p-6 sm:p-7 fade-up" data-interactive>
+            <div class="font-mono text-xs tracking-[0.2em] text-accentHover uppercase mb-2">NEXT HORIZON // 2026 TO 2028</div>
+            <h3 class="font-tech text-2xl font-bold text-primaryText mb-4">Future Engineering Roadmap</h3>
+            
+            <div class="space-y-3 text-xs sm:text-sm">
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-techCyan mt-0.5">Q1</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Dual Axis Autonomous Solar Tracking</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Closed loop servo positioning driven by quad optical sensors and BH1750 lux telemetry for peak solar incidence alignment.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-accentHover mt-0.5">Q2</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Custom 4 Layer Aerospace PCB &amp; High Power Scaling</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Advancing to a shielded multi layer PCB with integrated INA219 power telemetry and scaled phased array wireless power transmission.</p>
+                </div>
+              </div>
+              <div class="flex items-start gap-3 p-3.5 rounded-xl bg-abyss border border-borderSubtle">
+                <span class="font-mono text-xs font-bold text-energyAmber mt-0.5">Q3</span>
+                <div>
+                  <div class="font-semibold text-primaryText">Long Range LoRa Telemetry &amp; AI Beam Alignment</div>
+                  <p class="text-secondaryText text-xs mt-0.5">Integrating long distance RF telemetry links and predictive machine learning algorithms for continuous rectenna efficiency optimization.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- 10.5 PROJECT CREATOR INTRODUCTION -->
+        <div class="obsidian-card hud-corners p-6 sm:p-10 fade-up">
+          <div class="text-center max-w-2xl mx-auto mb-8">
+            <div class="font-mono text-xs tracking-[0.26em] text-techCyan uppercase mb-2">MISSION ARCHITECTS</div>
+            <h3 class="font-display text-2xl sm:text-4xl font-bold text-primaryText uppercase tracking-[0.1em]">Project Creator Introduction</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Creator 1: Ayank Raj -->
+            <div class="p-6 rounded-xl bg-abyss border border-borderMain spotlight-card tilt-card" data-interactive>
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-xl bg-elevated border border-accentViolet/50 flex items-center justify-center font-display text-xl font-bold text-primaryText">
+                  AR
+                </div>
+                <div>
+                  <h4 class="font-tech text-xl font-bold text-primaryText">Ayank Raj</h4>
+                  <div class="font-mono text-xs text-accentHover">LEAD SYSTEMS ARCHITECT &amp; FULL STACK EMBEDDED DEVELOPER</div>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed">
+                Conceptualized and engineered the Bharat Stellar Energy platform, leading the ESP8266 embedded firmware architecture, GPIO power switching matrix, real time telemetry interfaces, and interactive 3D space technology web experience. Driven by a vision to advance sustainable orbital energy research in India.
+              </p>
+            </div>
+
+            <!-- Creator 2: Umair Khan -->
+            <div class="p-6 rounded-xl bg-abyss border border-borderMain spotlight-card tilt-card" data-interactive>
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-xl bg-elevated border border-energyAmber/50 flex items-center justify-center font-display text-xl font-bold text-primaryText">
+                  UK
+                </div>
+                <div>
+                  <h4 class="font-tech text-xl font-bold text-primaryText">Umair Khan</h4>
+                  <div class="font-mono text-xs text-energyAmber">CO DEVELOPER &amp; HARDWARE RESEARCH COLLABORATOR</div>
+                </div>
+              </div>
+              <p class="text-xs sm:text-sm text-secondaryText leading-relaxed">
+                Co developed the Bharat Stellar Energy mission framework, contributing to hardware prototype integration, photovoltaic and wireless power transfer validation, technical documentation structuring, and system testing.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 10.6 REFERENCES AND ACKNOWLEDGEMENTS -->
+        <div class="obsidian-card p-6 sm:p-8 fade-up">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div>
+              <h4 class="font-tech text-lg font-bold text-primaryText uppercase tracking-[0.12em] mb-3 flex items-center gap-2">
+                <span class="text-techCyan font-mono">[01]</span> Scientific References
+              </h4>
+              <ul class="space-y-2 text-xs text-secondaryText leading-relaxed font-sans">
+                <li>&bull; Glaser, P. E. (1968). <em>"Power from the Sun: Its Future."</em> Science, Vol. 162, Issue 3856, pp. 857 to 861.</li>
+                <li>&bull; NASA Space Solar Power Exploratory Research and Technology (SERT) Program Technical Reports.</li>
+                <li>&bull; JAXA Space Solar Power Systems (SSPS) Wireless Power Transmission Architecture Studies.</li>
+                <li>&bull; ISRO Space Technology &amp; Orbital Renewable Energy Vision Papers.</li>
+              </ul>
+            </div>
+            <div>
+              <h4 class="font-tech text-lg font-bold text-primaryText uppercase tracking-[0.12em] mb-3 flex items-center gap-2">
+                <span class="text-energyAmber font-mono">[02]</span> Acknowledgements
+              </h4>
+              <p class="text-xs text-secondaryText leading-relaxed">
+                We extend our sincere gratitude to our mentors, faculty advisors, and the open source embedded systems and WebGL communities whose foundational tools (ESP8266 Arduino Core, Three.js, and modern web standards) empowered the creation of Bharat Stellar Energy.
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================================
+       PROFESSIONAL AEROSPACE FOOTER & LEGAL COPYRIGHT (ZERO HYPHENS)
+       ======================================================================== -->
+  <footer class="relative z-20 border-t border-borderMain bg-abyss/90 backdrop-blur-xl py-10 px-4 sm:px-8">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-titanium border border-borderMain flex items-center justify-center">
+          <span class="w-2.5 h-2.5 rounded-full bg-energyAmber"></span>
+        </div>
+        <div>
+          <div class="font-display text-sm font-bold tracking-[0.18em] text-primaryText">BHARAT STELLAR ENERGY</div>
+          <div class="font-mono text-[10px] tracking-[0.2em] text-mutedText">SPACE BASED SOLAR POWER RESEARCH INITIATIVE</div>
+        </div>
+      </div>
+
+      <div class="text-center md:text-right space-y-1">
+        <p class="font-tech text-xs sm:text-sm text-primaryText tracking-[0.08em]">
+          &copy; 2026 Bharat Stellar Energy. All Rights Reserved. Developed by <span class="text-accentHover font-semibold">Ayank Raj</span> &amp; <span class="text-energyAmber font-semibold">Umair Khan</span>.
+        </p>
+        <p class="font-mono text-[10px] text-mutedText tracking-[0.16em] uppercase">
+          ALL RIGHTS RESERVED 2026 &bull; DEVELOPED BY AYANK RAJ &bull; MISSION TELEMETRY v2.6
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ========================================================================
+       COMPLETE JAVASCRIPT ENGINE:
+       1. Cinematic Startup Loader & Starfield
+       2. Kinetic Split-Character, Scramble/Decode & Scroll Reveals
+       3. Smooth Interpolated Cursor Lighting, Magnetic Controls & 3D Tilt Cards
+       4. Randomized Autonomous Space Events Engine (Shooting Stars, Rotating Asteroids,
+          Satellite Crossings, Comets, Solar Flares & Cosmic Dust)
+       5. Three.js Real-Time 3D Earth, Clouds, Night City Lights, Orbiting Solar Satellite,
+          0.8 GHz / 24.9 W Wireless Beam & Scroll-Driven Camera Choreography
+       ======================================================================== -->
+  <script>
+    (function () {
+      'use strict';
+
+      const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      let isPageHidden = false;
+
+      document.addEventListener('visibilitychange', () => {
+        isPageHidden = document.hidden;
+      });
+
+      /* ======================================================================
+         1. CINEMATIC STARTUP LOADING SEQUENCE
+         ====================================================================== */
+      const loader = document.getElementById('startup-loader');
+      const loaderBar = document.getElementById('loader-bar');
+      const loaderPercent = document.getElementById('loader-percent');
+      const bootLine2 = document.getElementById('boot-line-2');
+      const bootLine3 = document.getElementById('boot-line-3');
+      const skipLoaderBtn = document.getElementById('skip-loader-btn');
+      const loaderStarsCanvas = document.getElementById('loader-stars');
+
+      if (loaderStarsCanvas) {
+        const lCtx = loaderStarsCanvas.getContext('2d');
+        loaderStarsCanvas.width = window.innerWidth;
+        loaderStarsCanvas.height = window.innerHeight;
+        const lStars = Array.from({ length: 110 }, () => ({
+          x: Math.random() * loaderStarsCanvas.width,
+          y: Math.random() * loaderStarsCanvas.height,
+          r: Math.random() * 1.4 + 0.3,
+          a: Math.random()
+        }));
+        function drawLoaderStars() {
+          if (!loader || loader.classList.contains('warp-exit')) return;
+          lCtx.clearRect(0, 0, loaderStarsCanvas.width, loaderStarsCanvas.height);
+          lStars.forEach(s => {
+            s.a += 0.025;
+            lCtx.fillStyle = `rgba(241, 243, 247, ${0.22 + Math.abs(Math.sin(s.a)) * 0.65})`;
+            lCtx.beginPath();
+            lCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+            lCtx.fill();
+          });
+          requestAnimationFrame(drawLoaderStars);
+        }
+        drawLoaderStars();
+      }
+
+      let loadProgress = 0;
+      let loaderDismissed = false;
+
+      function completeStartupSequence() {
+        if (loaderDismissed) return;
+        loaderDismissed = true;
+        loader.classList.add('warp-exit');
+        setTimeout(() => {
+          loader.style.display = 'none';
+          triggerHeroAnimations();
+        }, 700);
+      }
+
+      skipLoaderBtn.addEventListener('click', completeStartupSequence);
+
+      const bootInterval = setInterval(() => {
+        loadProgress += prefersReducedMotion ? 25 : Math.floor(Math.random() * 7) + 4;
+        if (loadProgress >= 100) {
+          loadProgress = 100;
+          clearInterval(bootInterval);
+          loaderBar.style.width = '100%';
+          loaderPercent.textContent = '100%';
+          setTimeout(completeStartupSequence, 360);
+        } else {
+          loaderBar.style.width = loadProgress + '%';
+          loaderPercent.textContent = loadProgress + '%';
+          if (loadProgress > 35) bootLine2.classList.remove('opacity-0');
+          if (loadProgress > 70) bootLine3.classList.remove('opacity-0');
+        }
+      }, 60);
+
+      /* ======================================================================
+         2. KINETIC SPLIT-CHARACTER, SCRAMBLE/DECODE & SCROLL REVEAL ENGINE
+         ====================================================================== */
+      const heroTitleEl = document.getElementById('hero-main-title');
+      if (heroTitleEl) {
+        const rawText = heroTitleEl.textContent.trim();
+        heroTitleEl.innerHTML = '';
+        let charIndex = 0;
+        rawText.split(' ').forEach((word, wIdx, arr) => {
+          const wordSpan = document.createElement('span');
+          wordSpan.className = 'inline-block whitespace-nowrap';
+          for (const ch of word) {
+            const span = document.createElement('span');
+            span.textContent = ch;
+            span.className = 'char-build';
+            span.style.transitionDelay = `${charIndex * 42}ms`;
+            wordSpan.appendChild(span);
+            charIndex++;
+          }
+          heroTitleEl.appendChild(wordSpan);
+          if (wIdx < arr.length - 1) {
+            heroTitleEl.appendChild(document.createTextNode(' '));
+          }
+        });
+      }
+
+      function scrambleText(element, finalText, duration = 1150) {
+        if (prefersReducedMotion) {
+          element.textContent = finalText;
+          return;
+        }
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789/#*+';
+        const start = performance.now();
+        function frame(now) {
+          const progress = Math.min((now - start) / duration, 1);
+          const revealCount = Math.floor(progress * finalText.length);
+          let out = '';
+          for (let i = 0; i < finalText.length; i++) {
+            if (finalText[i] === ' ' || finalText[i] === '&') {
+              out += finalText[i];
+            } else if (i < revealCount) {
+              out += finalText[i];
+            } else {
+              out += chars[Math.floor(Math.random() * chars.length)];
+            }
+          }
+          element.textContent = out;
+          if (progress < 1) requestAnimationFrame(frame);
+          else element.textContent = finalText;
+        }
+        requestAnimationFrame(frame);
+      }
+
+      function triggerHeroAnimations() {
+        const devSub = document.getElementById('hero-dev-subtitle');
+        if (devSub) {
+          devSub.classList.add('revealed');
+          scrambleText(devSub, devSub.dataset.scramble || devSub.textContent, 1200);
+        }
+        document.querySelectorAll('#hero-main-title .char-build').forEach(c => c.classList.add('revealed'));
+      }
+
+      const revealObserver = new IntersectionObserver(
+        entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('revealed');
+            }
+          });
+        },
+        { threshold: 0.14 }
+      );
+
+      document.querySelectorAll('.fade-up, .blur-focus, .text-3d-flip').forEach(el => {
+        revealObserver.observe(el);
+      });
+
+      /* ======================================================================
+         3. SMOOTH INTERPOLATED CURSOR ILLUMINATION, MAGNETIC & 3D TILT CARDS
+         ====================================================================== */
+      const cursorDot = document.getElementById('cursor-dot');
+      const cursorRing = document.getElementById('cursor-ring');
+      const globalSpotlight = document.getElementById('global-cursor-spotlight');
+
+      let pointerX = window.innerWidth / 2;
+      let pointerY = window.innerHeight / 2;
+      let ringX = pointerX;
+      let ringY = pointerY;
+      let spotX = pointerX;
+      let spotY = pointerY;
+
+      if (!isTouchDevice) {
+        document.body.classList.add('custom-cursor-active');
+        window.addEventListener('pointermove', e => {
+          pointerX = e.clientX;
+          pointerY = e.clientY;
+          if (cursorDot) {
+            cursorDot.style.left = pointerX + 'px';
+            cursorDot.style.top = pointerY + 'px';
+          }
+        }, { passive: true });
+
+        document.querySelectorAll('a, button, [data-interactive]').forEach(el => {
+          el.addEventListener('pointerenter', () => cursorRing && cursorRing.classList.add('hovering'));
+          el.addEventListener('pointerleave', () => cursorRing && cursorRing.classList.remove('hovering'));
+        });
+      } else {
+        // Lightweight touch interaction feedback
+        if (globalSpotlight) globalSpotlight.style.opacity = '0.45';
+        window.addEventListener('touchstart', e => {
+          if (e.touches && e.touches[0]) {
+            pointerX = e.touches[0].clientX;
+            pointerY = e.touches[0].clientY;
+          }
+        }, { passive: true });
+      }
+
+      // Smooth LERP loop for cursor ring & global ambient radial spotlight
+      function updatePointerIllumination() {
+        if (!isPageHidden) {
+          ringX += (pointerX - ringX) * 0.2;
+          ringY += (pointerY - ringY) * 0.2;
+          spotX += (pointerX - spotX) * 0.09;
+          spotY += (pointerY - spotY) * 0.09;
+
+          if (cursorRing && !isTouchDevice) {
+            cursorRing.style.left = ringX + 'px';
+            cursorRing.style.top = ringY + 'px';
+          }
+          if (globalSpotlight) {
+            globalSpotlight.style.setProperty('--spot-x', `${spotX.toFixed(1)}px`);
+            globalSpotlight.style.setProperty('--spot-y', `${spotY.toFixed(1)}px`);
+          }
+        }
+        requestAnimationFrame(updatePointerIllumination);
+      }
+      updatePointerIllumination();
+
+      // Magnetic Buttons
+      if (!isTouchDevice && !prefersReducedMotion) {
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+          btn.addEventListener('pointermove', e => {
+            const rect = btn.getBoundingClientRect();
+            const dx = e.clientX - (rect.left + rect.width / 2);
+            const dy = e.clientY - (rect.top + rect.height / 2);
+            btn.style.transform = `translate(${dx * 0.2}px, ${dy * 0.2}px)`;
+          });
+          btn.addEventListener('pointerleave', () => {
+            btn.style.transform = 'translate(0px, 0px)';
+          });
+        });
+      }
+
+      // 3D Tilt Cards + Radial Surface Illumination
+      document.querySelectorAll('.spotlight-card').forEach(card => {
+        card.addEventListener('pointermove', e => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+          card.style.setProperty('--mouse-x', `${x}px`);
+          card.style.setProperty('--mouse-y', `${y}px`);
+
+          if (card.classList.contains('tilt-card') && !isTouchDevice && !prefersReducedMotion) {
+            const rotateY = ((x / rect.width) - 0.5) * 7.5;
+            const rotateX = ((y / rect.height) - 0.5) * -7.5;
+            card.style.transform = `perspective(950px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
+          }
+        });
+        card.addEventListener('pointerleave', () => {
+          if (card.classList.contains('tilt-card')) {
+            card.style.transform = 'perspective(950px) rotateX(0deg) rotateY(0deg) translateY(0px)';
+          }
+        });
+      });
+
+      /* ======================================================================
+         4. RANDOMIZED AUTONOMOUS SPACE EVENTS & CURSOR PARTICLE TRAIL ENGINE
+            - Shooting stars: 8–18s
+            - Rotating asteroids with depth & shadow: 25–45s
+            - Satellite crossings with beacon strobe: 40–70s
+            - Distant comets with ionized tail: 60–100s
+            - Coronal solar flares: 45–90s
+            - Cosmic dust & subtle cursor trail particles
+         ====================================================================== */
+      const eventsCanvas = document.getElementById('space-events-canvas');
+      if (eventsCanvas && !prefersReducedMotion) {
+        const ctx = eventsCanvas.getContext('2d');
+        let ew = (eventsCanvas.width = window.innerWidth);
+        let eh = (eventsCanvas.height = window.innerHeight);
+
+        window.addEventListener('resize', () => {
+          ew = eventsCanvas.width = window.innerWidth;
+          eh = eventsCanvas.height = window.innerHeight;
+        });
+
+        const randRange = (min, max) => min + Math.random() * (max - min);
+
+        // Cosmic Dust Particles (Cursor-Reactive)
+        const dustCount = isTouchDevice ? 16 : 32;
+        const cosmicDust = Array.from({ length: dustCount }, () => ({
+          x: Math.random() * ew,
+          y: Math.random() * eh,
+          vx: (Math.random() - 0.5) * 0.22,
+          vy: (Math.random() - 0.5) * 0.22,
+          size: Math.random() * 1.4 + 0.4,
+          alpha: Math.random() * 0.45 + 0.15
+        }));
+
+        // Subtle Fading Cursor Trail Particles
+        const trailParticles = [];
+        if (!isTouchDevice) {
+          window.addEventListener('pointermove', e => {
+            if (trailParticles.length < 24 && Math.random() > 0.35) {
+              trailParticles.push({
+                x: e.clientX,
+                y: e.clientY,
+                vx: (Math.random() - 0.5) * 0.8,
+                vy: (Math.random() - 0.5) * 0.8,
+                life: 1,
+                rgb: Math.random() > 0.4 ? '146, 116, 248' : '131, 221, 242'
+              });
+            }
+          }, { passive: true });
+        }
+
+        // Active Space Events Lists
+        const shootingStars = [];
+        const asteroids = [];
+        const satellites = [];
+        const comets = [];
+        const solarFlares = [];
+
+        function spawnShootingStar() {
+          const startX = randRange(ew * 0.1, ew * 0.9);
+          const startY = randRange(0, eh * 0.45);
+          const angle = randRange(0.35, 0.78);
+          const speed = randRange(13, 21);
+          shootingStars.push({
+            x: startX,
+            y: startY,
+            vx: Math.cos(angle) * speed,
+            vy: Math.sin(angle) * speed,
+            length: randRange(90, 165),
+            life: 1
+          });
+          setTimeout(spawnShootingStar, randRange(8000, 18000));
+        }
+
+        function spawnAsteroid() {
+          const fromLeft = Math.random() > 0.5;
+          const depth = randRange(0.55, 1.15);
+          const radius = randRange(7, 14) * depth;
+          // Irregular polygon vertices for realistic rocky silhouette
+          const vertices = Array.from({ length: 9 }, (_, idx) => {
+            const a = (idx / 9) * Math.PI * 2;
+            const r = radius * randRange(0.76, 1.18);
+            return { x: Math.cos(a) * r, y: Math.sin(a) * r };
+          });
+          asteroids.push({
+            x: fromLeft ? -40 : ew + 40,
+            y: randRange(eh * 0.12, eh * 0.78),
+            vx: (fromLeft ? 1 : -1) * randRange(0.9, 1.8) * depth,
+            vy: randRange(-0.28, 0.35),
+            rot: Math.random() * Math.PI * 2,
+            vRot: (Math.random() - 0.5) * 0.018,
+            radius,
+            depth,
+            vertices
+          });
+          setTimeout(spawnAsteroid, randRange(25000, 45000));
+        }
+
+        function spawnSatelliteCrossing() {
+          const fromLeft = Math.random() > 0.5;
+          satellites.push({
+            x: fromLeft ? -30 : ew + 30,
+            y: randRange(eh * 0.08, eh * 0.42),
+            vx: (fromLeft ? 1 : -1) * randRange(1.2, 2.0),
+            vy: randRange(-0.12, 0.18),
+            pulse: 0
+          });
+          setTimeout(spawnSatelliteCrossing, randRange(40000, 70000));
+        }
+
+        function spawnComet() {
+          const fromLeft = Math.random() > 0.3;
+          comets.push({
+            x: fromLeft ? -80 : ew + 80,
+            y: randRange(eh * 0.06, eh * 0.36),
+            vx: (fromLeft ? 1 : -1) * randRange(2.2, 3.2),
+            vy: randRange(0.25, 0.55),
+            tailLen: randRange(160, 240)
+          });
+          setTimeout(spawnComet, randRange(60000, 100000));
+        }
+
+        function spawnSolarFlare() {
+          solarFlares.push({
+            x: ew * 0.84,
+            y: eh * 0.16,
+            radius: randRange(140, 230),
+            phase: 0
+          });
+          setTimeout(spawnSolarFlare, randRange(45000, 90000));
+        }
+
+        // Schedule initial random events smoothly after startup
+        setTimeout(spawnShootingStar, randRange(4000, 9000));
+        setTimeout(spawnAsteroid, randRange(12000, 22000));
+        setTimeout(spawnSatelliteCrossing, randRange(18000, 32000));
+        setTimeout(spawnComet, randRange(28000, 48000));
+        setTimeout(spawnSolarFlare, randRange(15000, 30000));
+
+        function renderSpaceEvents() {
+          if (!isPageHidden) {
+            ctx.clearRect(0, 0, ew, eh);
+
+            // 1. Subtle Solar Corona Flares
+            for (let i = solarFlares.length - 1; i >= 0; i--) {
+              const f = solarFlares[i];
+              f.phase += 0.008;
+              if (f.phase >= Math.PI) {
+                solarFlares.splice(i, 1);
+                continue;
+              }
+              const alpha = Math.sin(f.phase) * 0.12;
+              const grad = ctx.createRadialGradient(f.x, f.y, 4, f.x, f.y, f.radius);
+              grad.addColorStop(0, `rgba(230, 173, 104, ${alpha * 1.4})`);
+              grad.addColorStop(0.5, `rgba(146, 116, 248, ${alpha * 0.5})`);
+              grad.addColorStop(1, 'rgba(7, 9, 13, 0)');
+              ctx.fillStyle = grad;
+              ctx.beginPath();
+              ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 2. Cosmic Dust (Reacting gently to pointer proximity)
+            for (let i = 0; i < cosmicDust.length; i++) {
+              const d = cosmicDust[i];
+              d.x += d.vx;
+              d.y += d.vy;
+              if (d.x < 0) d.x = ew;
+              if (d.x > ew) d.x = 0;
+              if (d.y < 0) d.y = eh;
+              if (d.y > eh) d.y = 0;
+
+              if (!isTouchDevice) {
+                const dx = d.x - spotX;
+                const dy = d.y - spotY;
+                const dist = Math.hypot(dx, dy);
+                if (dist < 160 && dist > 1) {
+                  d.x += (dx / dist) * 0.35;
+                  d.y += (dy / dist) * 0.35;
+                }
+              }
+
+              ctx.fillStyle = `rgba(196, 203, 213, ${d.alpha})`;
+              ctx.beginPath();
+              ctx.arc(d.x, d.y, d.size, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 3. Fading Cursor Micro-Particles
+            for (let i = trailParticles.length - 1; i >= 0; i--) {
+              const pt = trailParticles[i];
+              pt.x += pt.vx;
+              pt.y += pt.vy;
+              pt.life -= 0.035;
+              if (pt.life <= 0) {
+                trailParticles.splice(i, 1);
+                continue;
+              }
+              ctx.fillStyle = `rgba(${pt.rgb}, ${pt.life * 0.48})`;
+              ctx.beginPath();
+              ctx.arc(pt.x, pt.y, pt.life * 2, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 4. Shooting Stars
+            for (let i = shootingStars.length - 1; i >= 0; i--) {
+              const s = shootingStars[i];
+              s.x += s.vx;
+              s.y += s.vy;
+              s.life -= 0.022;
+              if (s.life <= 0 || s.x > ew + 120 || s.y > eh + 120) {
+                shootingStars.splice(i, 1);
+                continue;
+              }
+              const mag = Math.hypot(s.vx, s.vy);
+              const tx = s.x - (s.vx / mag) * s.length;
+              const ty = s.y - (s.vy / mag) * s.length;
+              const grad = ctx.createLinearGradient(s.x, s.y, tx, ty);
+              grad.addColorStop(0, `rgba(241, 243, 247, ${s.life * 0.9})`);
+              grad.addColorStop(0.35, `rgba(131, 221, 242, ${s.life * 0.45})`);
+              grad.addColorStop(1, 'rgba(7, 9, 13, 0)');
+              ctx.strokeStyle = grad;
+              ctx.lineWidth = 1.6;
+              ctx.beginPath();
+              ctx.moveTo(s.x, s.y);
+              ctx.lineTo(tx, ty);
+              ctx.stroke();
+            }
+
+            // 5. Small Rotating Asteroids with Motion Blur & Terminator Shadow
+            for (let i = asteroids.length - 1; i >= 0; i--) {
+              const a = asteroids[i];
+              a.x += a.vx;
+              a.y += a.vy;
+              a.rot += a.vRot;
+              if (a.x < -90 || a.x > ew + 90) {
+                asteroids.splice(i, 1);
+                continue;
+              }
+              // Subtle motion blur wake
+              const wakeGrad = ctx.createLinearGradient(a.x, a.y, a.x - a.vx * 26, a.y - a.vy * 26);
+              wakeGrad.addColorStop(0, 'rgba(146, 157, 172, 0.16)');
+              wakeGrad.addColorStop(1, 'rgba(7, 9, 13, 0)');
+              ctx.strokeStyle = wakeGrad;
+              ctx.lineWidth = a.radius * 1.1;
+              ctx.lineCap = 'round';
+              ctx.beginPath();
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(a.x - a.vx * 26, a.y - a.vy * 26);
+              ctx.stroke();
+
+              // Rocky body with directional solar shading
+              ctx.save();
+              ctx.translate(a.x, a.y);
+              ctx.rotate(a.rot);
+              const rockGrad = ctx.createLinearGradient(-a.radius, -a.radius, a.radius, a.radius);
+              rockGrad.addColorStop(0, '#929DAC');
+              rockGrad.addColorStop(0.55, '#26303D');
+              rockGrad.addColorStop(1, '#0B0F16');
+              ctx.fillStyle = rockGrad;
+              ctx.strokeStyle = 'rgba(196, 203, 213, 0.25)';
+              ctx.lineWidth = 0.8;
+              ctx.beginPath();
+              a.vertices.forEach((v, idx) => {
+                if (idx === 0) ctx.moveTo(v.x, v.y);
+                else ctx.lineTo(v.x, v.y);
+              });
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+              ctx.restore();
+            }
+
+            // 6. High-Altitude Satellite Crossings
+            for (let i = satellites.length - 1; i >= 0; i--) {
+              const sat = satellites[i];
+              sat.x += sat.vx;
+              sat.y += sat.vy;
+              sat.pulse += 0.08;
+              if (sat.x < -60 || sat.x > ew + 60) {
+                satellites.splice(i, 1);
+                continue;
+              }
+              // Tiny solar wing crossbar
+              ctx.strokeStyle = 'rgba(131, 221, 242, 0.55)';
+              ctx.lineWidth = 1.2;
+              ctx.beginPath();
+              ctx.moveTo(sat.x - 6, sat.y - 2);
+              ctx.lineTo(sat.x + 6, sat.y + 2);
+              ctx.stroke();
+
+              // Beacon strobe
+              const beaconAlpha = 0.35 + Math.abs(Math.sin(sat.pulse)) * 0.65;
+              ctx.fillStyle = `rgba(241, 243, 247, ${beaconAlpha})`;
+              ctx.beginPath();
+              ctx.arc(sat.x, sat.y, 1.8, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // 7. Distant Icy Comets
+            for (let i = comets.length - 1; i >= 0; i--) {
+              const c = comets[i];
+              c.x += c.vx;
+              c.y += c.vy;
+              if (c.x < -280 || c.x > ew + 280) {
+                comets.splice(i, 1);
+                continue;
+              }
+              const mag = Math.hypot(c.vx, c.vy);
+              const tx = c.x - (c.vx / mag) * c.tailLen;
+              const ty = c.y - (c.vy / mag) * c.tailLen;
+              const tailGrad = ctx.createLinearGradient(c.x, c.y, tx, ty);
+              tailGrad.addColorStop(0, 'rgba(181, 162, 255, 0.55)');
+              tailGrad.addColorStop(0.4, 'rgba(131, 221, 242, 0.22)');
+              tailGrad.addColorStop(1, 'rgba(7, 9, 13, 0)');
+              ctx.strokeStyle = tailGrad;
+              ctx.lineWidth = 3.2;
+              ctx.lineCap = 'round';
+              ctx.beginPath();
+              ctx.moveTo(c.x, c.y);
+              ctx.lineTo(tx, ty);
+              ctx.stroke();
+
+              ctx.fillStyle = '#F1F3F7';
+              ctx.beginPath();
+              ctx.arc(c.x, c.y, 2.3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+          requestAnimationFrame(renderSpaceEvents);
+        }
+        renderSpaceEvents();
+      }
+
+      /* ======================================================================
+         5. UI CONTROLS: MOBILE MENU, TELEMETRY DRAWER, GPIO MATRIX SIMULATOR
+         ====================================================================== */
+      const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      mobileMenuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+      document.querySelectorAll('.mobile-nav-link').forEach(link => {
+        link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+      });
+
+      const telemetryDrawer = document.getElementById('telemetry-drawer');
+      document.getElementById('telemetry-drawer-btn').addEventListener('click', () => {
+        telemetryDrawer.classList.toggle('hidden');
+      });
+      document.getElementById('close-telemetry-btn').addEventListener('click', () => {
+        telemetryDrawer.classList.add('hidden');
+      });
+
+      // Locked Precision Orbital Telemetry (0.8 GHz & 24.9 W)
+      const hudFlux = document.getElementById('hud-flux');
+      const hudTemp = document.getElementById('hud-temp');
+      const hudPower = document.getElementById('hud-power');
+      setInterval(() => {
+        if (isPageHidden) return;
+        const flux = (1361.0 + Math.random() * 0.6).toFixed(1);
+        const temp = (32.2 + Math.random() * 0.5).toFixed(1);
+        if (hudFlux) hudFlux.textContent = `${flux} W/m²`;
+        if (hudTemp) hudTemp.textContent = `${temp} °C`;
+        if (hudPower) hudPower.textContent = `24.9 W DC`;
+      }, 2200);
+
+      // Interactive GPIO Simulator Buttons (Zero Hyphens)
+      const gpioLog = document.getElementById('gpio-console-log');
+      document.querySelectorAll('.gpio-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const isHigh = btn.classList.contains('border-accentViolet');
+          const pin = btn.dataset.pin;
+          if (isHigh) {
+            btn.classList.remove('bg-elevated', 'border-accentViolet', 'text-primaryText');
+            btn.classList.add('bg-abyss', 'border-borderMain', 'text-mutedText');
+            btn.textContent = btn.textContent.replace('[HIGH]', '[LOW]').replace('[ARMED]', '[STANDBY]');
+            gpioLog.textContent = `> [GPIO CMD] Pin ${pin} switched to LOW (0V) // State synced via ESP8266 JSON API.`;
+          } else {
+            btn.classList.add('bg-elevated', 'border-accentViolet', 'text-primaryText');
+            btn.classList.remove('bg-abyss', 'border-borderMain', 'text-mutedText');
+            btn.textContent = btn.textContent.replace('[LOW]', '[HIGH]').replace('[STANDBY]', '[ARMED]');
+            gpioLog.textContent = `> [GPIO CMD] Pin ${pin} energized HIGH (3.3V) // Relay matrix active.`;
+          }
+        });
+      });
+
+      /* ======================================================================
+         6. THREE.JS 3D PLANETARY & ORBITAL SOLAR POWER SIMULATION
+            (Refined Titanium & Obsidian Lighting + Scroll Choreography)
+         ====================================================================== */
+      window.addEventListener('load', () => {
+        const canvas = document.getElementById('webgl-canvas');
+        if (!canvas || typeof THREE === 'undefined') return;
+
+        const scene = new THREE.Scene();
+        scene.fog = new THREE.FogExp2(0x07090d, 0.011);
+
+        const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 2.35, 11.5);
+        camera.lookAt(0, 0.85, 0);
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true, powerPreference: 'high-performance' });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        // Clamp pixel ratio to 1.75 for crisp rendering & smooth performance on mid-range Android devices
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.75));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.1;
+
+        function createEarthTextures() {
+          const w = 1024, h = 512;
+          const diffCanvas = document.createElement('canvas');
+          diffCanvas.width = w; diffCanvas.height = h;
+          const ctx = diffCanvas.getContext('2d');
+
+          const oceanGrad = ctx.createLinearGradient(0, 0, 0, h);
+          oceanGrad.addColorStop(0, '#070E1C');
+          oceanGrad.addColorStop(0.5, '#0D213D');
+          oceanGrad.addColorStop(1, '#070E1C');
+          ctx.fillStyle = oceanGrad;
+          ctx.fillRect(0, 0, w, h);
+
+          ctx.fillStyle = '#18383A';
+          const landBlobs = [
+            [680, 225, 36, 48], [695, 200, 65, 35],
+            [560, 120, 190, 80], [740, 130, 130, 75],
+            [520, 210, 75, 115],
+            [210, 130, 95, 85], [275, 255, 65, 110],
+            [815, 325, 65, 45]
+          ];
+          landBlobs.forEach(([cx, cy, rx, ry]) => {
+            ctx.beginPath();
+            ctx.ellipse(cx, cy, rx, ry, 0.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#26494A';
+            ctx.beginPath();
+            ctx.ellipse(cx + 6, cy - 4, rx * 0.65, ry * 0.65, -0.1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#18383A';
+          });
+
+          // Warm Amber City Lights
+          ctx.fillStyle = '#E6AD68';
+          for (let i = 0; i < 600; i++) {
+            const b = landBlobs[i % landBlobs.length];
+            const px = b[0] + (Math.random() - 0.5) * b[2] * 1.4;
+            const py = b[1] + (Math.random() - 0.5) * b[3] * 1.4;
+            ctx.globalAlpha = Math.random() * 0.8;
+            ctx.fillRect(px, py, 1.7, 1.7);
+          }
+          ctx.globalAlpha = 1;
+
+          const cloudCanvas = document.createElement('canvas');
+          cloudCanvas.width = w; cloudCanvas.height = h;
+          const cCtx = cloudCanvas.getContext('2d');
+          for (let i = 0; i < 210; i++) {
+            const cx = Math.random() * w;
+            const cy = Math.random() * h;
+            const rx = 25 + Math.random() * 80;
+            const ry = 6 + Math.random() * 16;
+            const g = cCtx.createRadialGradient(cx, cy, 1, cx, cy, rx);
+            g.addColorStop(0, 'rgba(241,243,247,0.34)');
+            g.addColorStop(1, 'rgba(241,243,247,0)');
+            cCtx.fillStyle = g;
+            cCtx.beginPath();
+            cCtx.ellipse(cx, cy, rx, ry, (Math.random() - 0.5) * 0.4, 0, Math.PI * 2);
+            cCtx.fill();
+          }
+
+          return {
+            earthMap: new THREE.CanvasTexture(diffCanvas),
+            cloudMap: new THREE.CanvasTexture(cloudCanvas)
+          };
+        }
+
+        const { earthMap, cloudMap } = createEarthTextures();
+
+        const planetGroup = new THREE.Group();
+        planetGroup.position.set(0, -3.55, 0);
+        scene.add(planetGroup);
+
+        // 1. Earth Sphere
+        const earthGeo = new THREE.SphereGeometry(4.2, 64, 64);
+        const earthMat = new THREE.MeshStandardMaterial({
+          map: earthMap,
+          roughness: 0.68,
+          metalness: 0.14,
+          emissive: new THREE.Color(0x0b1526),
+          emissiveIntensity: 0.5
+        });
+        const earthMesh = new THREE.Mesh(earthGeo, earthMat);
+        earthMesh.rotation.y = -1.9;
+        planetGroup.add(earthMesh);
+
+        // 2. Cloud Sphere
+        const cloudGeo = new THREE.SphereGeometry(4.26, 64, 64);
+        const cloudMat = new THREE.MeshLambertMaterial({
+          map: cloudMap,
+          transparent: true,
+          opacity: 0.45,
+          depthWrite: false
+        });
+        const cloudMesh = new THREE.Mesh(cloudGeo, cloudMat);
+        planetGroup.add(cloudMesh);
+
+        // 3. Atmospheric Rim Glow (Technical Cyan & Violet-Silver Horizon)
+        const atmoGeo = new THREE.SphereGeometry(4.46, 64, 64);
+        const atmoMat = new THREE.ShaderMaterial({
+          transparent: true,
+          side: THREE.BackSide,
+          blending: THREE.AdditiveBlending,
+          vertexShader: `
+            varying vec3 vNormal;
+            void main() {
+              vNormal = normalize(normalMatrix * normal);
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+          `,
+          fragmentShader: `
+            varying vec3 vNormal;
+            void main() {
+              float intensity = pow(0.66 - dot(vNormal, vec3(0.0, 0.0, 1.0)), 3.3);
+              gl_FragColor = vec4(0.51, 0.86, 0.95, 1.0) * intensity * 1.25;
+            }
+          `
+        });
+        const atmosphereMesh = new THREE.Mesh(atmoGeo, atmoMat);
+        planetGroup.add(atmosphereMesh);
+
+        // 4. Geostationary Orbital Rings
+        const ringsGroup = new THREE.Group();
+        const ringGeo = new THREE.RingGeometry(5.55, 5.58, 128);
+        const ringMat = new THREE.MeshBasicMaterial({
+          color: 0x83ddf2,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.26
+        });
+        const orbitalRing = new THREE.Mesh(ringGeo, ringMat);
+        orbitalRing.rotation.x = Math.PI / 2.25;
+        orbitalRing.rotation.y = 0.22;
+        ringsGroup.add(orbitalRing);
+
+        const outerRingGeo = new THREE.RingGeometry(6.1, 6.12, 128);
+        const outerRingMat = new THREE.MeshBasicMaterial({
+          color: 0x9274f8,
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.22
+        });
+        const outerRing = new THREE.Mesh(outerRingGeo, outerRingMat);
+        outerRing.rotation.x = Math.PI / 2.25;
+        outerRing.rotation.y = 0.22;
+        ringsGroup.add(outerRing);
+        planetGroup.add(ringsGroup);
+
+        // 5. Orbiting BSE Solar Power Satellite + 0.8 GHz Wireless Beam
+        const satellitePivot = new THREE.Group();
+        satellitePivot.rotation.z = 0.22;
+        planetGroup.add(satellitePivot);
+
+        const satelliteGroup = new THREE.Group();
+        satelliteGroup.position.set(5.57, 0, 0);
+
+        const satBody = new THREE.Mesh(
+          new THREE.BoxGeometry(0.24, 0.24, 0.34),
+          new THREE.MeshStandardMaterial({ color: 0xe6ad68, metalness: 0.85, roughness: 0.22 })
+        );
+        satelliteGroup.add(satBody);
+
+        const wingMat = new THREE.MeshStandardMaterial({
+          color: 0x171f2b,
+          emissive: 0x83ddf2,
+          emissiveIntensity: 0.25,
+          metalness: 0.75,
+          roughness: 0.25
+        });
+        const leftWing = new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.35, 0.36), wingMat);
+        leftWing.position.set(0, 0.82, 0);
+        const rightWing = new THREE.Mesh(new THREE.BoxGeometry(0.03, 1.35, 0.36), wingMat);
+        rightWing.position.set(0, -0.82, 0);
+        satelliteGroup.add(leftWing, rightWing);
+
+        const beamLength = 1.4;
+        const beamGeo = new THREE.CylinderGeometry(0.04, 0.25, beamLength, 24, 1, true);
+        beamGeo.rotateZ(Math.PI / 2);
+        const beamMat = new THREE.MeshBasicMaterial({
+          color: 0x83ddf2,
+          transparent: true,
+          opacity: 0.28,
+          side: THREE.DoubleSide,
+          blending: THREE.AdditiveBlending,
+          depthWrite: false
+        });
+        const microwaveBeam = new THREE.Mesh(beamGeo, beamMat);
+        microwaveBeam.position.set(-beamLength / 2 - 0.1, 0, 0);
+        satelliteGroup.add(microwaveBeam);
+
+        satellitePivot.add(satelliteGroup);
+
+        // 6. Distant Sun Core
+        const sunMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(0.85, 32, 32),
+          new THREE.MeshBasicMaterial({ color: 0xe6ad68 })
+        );
+        sunMesh.position.set(16, 10, -28);
+        scene.add(sunMesh);
+
+        // 7. Crisp Monochromatic Starfield
+        const starCount = isTouchDevice ? 750 : 1400;
+        const starPositions = new Float32Array(starCount * 3);
+        for (let i = 0; i < starCount * 3; i += 3) {
+          starPositions[i] = (Math.random() - 0.5) * 140;
+          starPositions[i + 1] = (Math.random() - 0.5) * 140;
+          starPositions[i + 2] = -10 - Math.random() * 90;
+        }
+        const starsGeo = new THREE.BufferGeometry();
+        starsGeo.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
+        const starsMat = new THREE.PointsMaterial({
+          color: 0xf1f3f7,
+          size: 0.15,
+          transparent: true,
+          opacity: 0.78
+        });
+        const starField = new THREE.Points(starsGeo, starsMat);
+        scene.add(starField);
+
+        // Aerospace Lighting Setup
+        const ambientLight = new THREE.AmbientLight(0x1b2532, 0.7);
+        scene.add(ambientLight);
+
+        const sunLight = new THREE.DirectionalLight(0xf1f3f7, 2.05);
+        sunLight.position.set(10, 8, 9);
+        scene.add(sunLight);
+
+        const rimLight = new THREE.DirectionalLight(0x9274f8, 0.75);
+        rimLight.position.set(-10, -4, -6);
+        scene.add(rimLight);
+
+        // Telemetry Drawer Interactive 3D Toggles (0.8 GHz Locked)
+        let beamActive = true;
+        let ringsVisible = true;
+        let manualStageOverride = null;
+
+        document.getElementById('toggle-beam-btn').addEventListener('click', function () {
+          beamActive = !beamActive;
+          microwaveBeam.visible = beamActive;
+          this.textContent = beamActive ? 'ACTIVE' : 'STANDBY';
+          document.getElementById('hud-beam').textContent = beamActive ? '0.8 GHz // ON' : '0.8 GHz // STANDBY';
+        });
+
+        document.getElementById('toggle-rings-btn').addEventListener('click', function () {
+          ringsVisible = !ringsVisible;
+          ringsGroup.visible = ringsVisible;
+          this.textContent = ringsVisible ? 'VISIBLE' : 'HIDDEN';
+        });
+
+        document.getElementById('cycle-camera-btn').addEventListener('click', () => {
+          manualStageOverride = manualStageOverride === null ? 1 : (manualStageOverride + 1) % 4;
+          setTimeout(() => { manualStageOverride = null; }, 5000);
+        });
+
+        const stageTargets = [
+          { planetPos: new THREE.Vector3(0, -3.55, 0), camPos: new THREE.Vector3(0, 2.35, 11.5), lookAt: new THREE.Vector3(0, 0.85, 0) },
+          { planetPos: new THREE.Vector3(3.4, -0.2, 0), camPos: new THREE.Vector3(0, 0.2, 11.2), lookAt: new THREE.Vector3(0, 0, 0) },
+          { planetPos: new THREE.Vector3(-1.6, -2.3, 2.6), camPos: new THREE.Vector3(0.4, 0.6, 8.2), lookAt: new THREE.Vector3(0, -0.3, 0) },
+          { planetPos: new THREE.Vector3(0, -3.9, -1.5), camPos: new THREE.Vector3(0, 1.4, 12.2), lookAt: new THREE.Vector3(0, 0.2, 0) }
+        ];
+
+        let currentStage = 0;
+        const currentLookAt = new THREE.Vector3(0, 0.85, 0);
+        const scrollProgressBar = document.getElementById('scroll-progress-bar');
+        const navLinks = document.querySelectorAll('.nav-link');
+
+        function updateScrollState() {
+          const scrollTop = window.scrollY;
+          const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+          const scrollFrac = docHeight > 0 ? Math.min(Math.max(scrollTop / docHeight, 0), 1) : 0;
+          if (scrollProgressBar) {
+            scrollProgressBar.style.width = `${scrollFrac * 100}%`;
+          }
+
+          if (manualStageOverride !== null) {
+            currentStage = manualStageOverride;
+            return;
+          }
+
+          const sections = document.querySelectorAll('section[data-camera-stage]');
+          const triggerPoint = window.innerHeight * 0.48;
+          sections.forEach(sec => {
+            const rect = sec.getBoundingClientRect();
+            if (rect.top <= triggerPoint && rect.bottom >= triggerPoint) {
+              currentStage = parseInt(sec.dataset.cameraStage, 10) || 0;
+            }
+          });
+
+          navLinks.forEach(link => {
+            const st = parseInt(link.dataset.stage, 10);
+            if (st === currentStage) {
+              link.classList.add('text-primaryText', 'border-accentViolet');
+              link.classList.remove('text-mutedText', 'border-transparent');
+            } else {
+              link.classList.remove('text-primaryText', 'border-accentViolet');
+              link.classList.add('text-mutedText', 'border-transparent');
+            }
+          });
+        }
+
+        window.addEventListener('scroll', updateScrollState, { passive: true });
+        updateScrollState();
+
+        let targetMouseX = 0;
+        let targetMouseY = 0;
+        window.addEventListener('pointermove', e => {
+          targetMouseX = (e.clientX / window.innerWidth - 0.5) * 0.55;
+          targetMouseY = (e.clientY / window.innerHeight - 0.5) * 0.4;
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+          camera.aspect = window.innerWidth / window.innerHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        const clock = new THREE.Clock();
+        function animate() {
+          requestAnimationFrame(animate);
+          if (isPageHidden) return;
+
+          const elapsed = clock.getElapsedTime();
+
+          if (!prefersReducedMotion) {
+            earthMesh.rotation.y += 0.0013;
+            cloudMesh.rotation.y += 0.0018;
+            satellitePivot.rotation.y = elapsed * 0.3;
+
+            if (beamActive) {
+              beamMat.opacity = 0.22 + Math.sin(elapsed * 4.5) * 0.1;
+            }
+
+            starField.rotation.y = elapsed * 0.007;
+          }
+
+          const target = stageTargets[currentStage] || stageTargets[0];
+          planetGroup.position.lerp(target.planetPos, 0.055);
+
+          const desiredCamPos = target.camPos.clone();
+          desiredCamPos.x += targetMouseX;
+          desiredCamPos.y -= targetMouseY;
+          camera.position.lerp(desiredCamPos, 0.055);
+
+          currentLookAt.lerp(target.lookAt, 0.055);
+          camera.lookAt(currentLookAt);
+
+          renderer.render(scene, camera);
+        }
+
+        animate();
+      });
+    })();
+  </script>
+</body>
+</html>
